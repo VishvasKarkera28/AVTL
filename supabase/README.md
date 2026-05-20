@@ -52,7 +52,7 @@ The service-role key is required for API-managed user creation, RBAC writes, and
 
 ## First Admin Bootstrap
 
-After the migrations are applied, create the first platform admin and the BP demo truck with:
+After the migrations are applied, create the first platform admin and the BP customer demo truck with:
 
 ```bash
 npm run bootstrap:admin

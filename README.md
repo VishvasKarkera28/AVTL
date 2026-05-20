@@ -115,7 +115,7 @@ supabase/migrations/202605200003_auth_crud_and_entities.sql
 
 Supabase Storage uses one private bucket named `FlashAVTLStorage`. The five required storage areas are folder prefixes inside that bucket: `vehicle-documents`, `damage-media`, `identity-evidence`, `inspection-media`, and `firmware-artifacts`.
 
-Create the first platform admin and BP demo truck with the service-role bootstrap script:
+Create the first platform admin and BP customer demo truck with the service-role bootstrap script:
 
 ```bash
 npm run bootstrap:admin

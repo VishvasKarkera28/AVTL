@@ -166,7 +166,7 @@ function App() {
   const [appMessage, setAppMessage] = useState<AppMessage>({
     tone: "info",
     text: hasApiConfig(apiConfig)
-      ? "Sign in to continue to the BP Petroleum command center."
+      ? "Welcome back. Sign in to open your secure fleet workspace."
       : "Welcome to FlashAVTL. Connect the API to unlock live fleet operations."
   });
 
@@ -276,11 +276,7 @@ function App() {
     <div className="app-shell">
       <aside className="sidebar" aria-label="Primary navigation">
         <div className="brand-block">
-          <img
-            className="brand-logo"
-            src="/flashavtl-logo.png"
-            alt="FlashAVTL - Track. Lock. Protect. Everywhere."
-          />
+          <BrandLockup />
         </div>
 
         <nav className="nav-stack">
@@ -319,13 +315,9 @@ function App() {
       <main className="content-area">
         <header className="topbar">
           <div className="topbar-title">
-            <img
-              className="topbar-logo"
-              src="/flashavtl-logo.png"
-              alt="FlashAVTL"
-            />
+            <BrandMark />
             <div>
-              <p className="eyebrow">BP Petroleum pilot workspace</p>
+              <p className="eyebrow">Customer workspace: BP</p>
               <h2>{navigation.find((item) => item.id === activeSection)?.label}</h2>
             </div>
           </div>
@@ -427,6 +419,26 @@ function App() {
   );
 }
 
+function BrandMark() {
+  return (
+    <span className="brand-mark-pro" aria-hidden="true">
+      <LockKeyhole size={18} />
+    </span>
+  );
+}
+
+function BrandLockup() {
+  return (
+    <div className="brand-lockup" aria-label="FlashAVTL">
+      <BrandMark />
+      <div>
+        <strong>FlashAVTL</strong>
+        <span>Track. Lock. Protect.</span>
+      </div>
+    </div>
+  );
+}
+
 function AuthScreen({
   apiClient,
   appMessage,
@@ -466,62 +478,69 @@ function AuthScreen({
 
   return (
     <main className="auth-screen">
-      <section className="auth-panel">
-        <div className="brand-block">
-          <img
-            className="brand-logo auth-logo"
-            src="/flashavtl-logo.png"
-            alt="FlashAVTL - Track. Lock. Protect. Everywhere."
-          />
+      <section className="auth-layout">
+        <div className="auth-intro">
+          <BrandLockup />
+          <div className="auth-copy">
+            <p className="eyebrow">Secure fleet access</p>
+            <h1>Welcome to FlashAVTL</h1>
+            <p>Track, lock, and protect high-value fleet assets from one controlled operations workspace.</p>
+          </div>
+          <div className="workspace-chip">
+            <span>Customer workspace</span>
+            <strong>BP</strong>
+          </div>
         </div>
-        <div className="auth-copy">
-          <p className="eyebrow">Welcome</p>
-          <h1>Welcome to FlashAVTL</h1>
-          <p>Track, lock, and protect every BP Petroleum asset from one secure command center.</p>
-        </div>
-        <p className={`message ${appMessage.tone}`}>{appMessage.text}</p>
-        <div className="segmented-control">
-          <button className={mode === "signin" ? "active" : ""} onClick={() => setMode("signin")}>
-            <LogIn size={16} aria-hidden="true" />
-            Sign in
-          </button>
-          <button className={mode === "signup" ? "active" : ""} onClick={() => setMode("signup")}>
-            <UserPlus size={16} aria-hidden="true" />
-            Sign up
-          </button>
-        </div>
-        <form className="form-grid" onSubmit={submitAuth}>
-          {mode === "signup" && (
-            <>
-              <label>
-                Full name
-                <input value={form.fullName} onChange={(event) => setForm({ ...form, fullName: event.target.value })} required />
-              </label>
-              <label>
-                Phone
-                <input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
-              </label>
-            </>
-          )}
-          <label>
-            Email
-            <input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required />
-          </label>
-          <label>
-            Password
-            <input
-              type="password"
-              minLength={12}
-              value={form.password}
-              onChange={(event) => setForm({ ...form, password: event.target.value })}
-              required
-            />
-          </label>
-          <button className="submit-button" type="submit" disabled={isSubmitting}>
-            <ShieldCheck size={17} aria-hidden="true" />
-            {isSubmitting ? "Working..." : mode === "signin" ? "Sign in securely" : "Create account"}
-          </button>
-        </form>
+
+        <section className="auth-panel" aria-label="Account access">
+          <div className="auth-panel-heading">
+            <p className="eyebrow">{mode === "signin" ? "Account access" : "Create user"}</p>
+            <h2>{mode === "signin" ? "Sign in" : "Create account"}</h2>
+          </div>
+          <p className={`message ${appMessage.tone}`}>{appMessage.text}</p>
+          <div className="segmented-control">
+            <button className={mode === "signin" ? "active" : ""} onClick={() => setMode("signin")}>
+              <LogIn size={16} aria-hidden="true" />
+              Sign in
+            </button>
+            <button className={mode === "signup" ? "active" : ""} onClick={() => setMode("signup")}>
+              <UserPlus size={16} aria-hidden="true" />
+              Sign up
+            </button>
+          </div>
+          <form className="form-grid auth-form" onSubmit={submitAuth}>
+            {mode === "signup" && (
+              <>
+                <label>
+                  Full name
+                  <input value={form.fullName} onChange={(event) => setForm({ ...form, fullName: event.target.value })} required />
+                </label>
+                <label>
+                  Phone
+                  <input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
+                </label>
+              </>
+            )}
+            <label>
+              Email
+              <input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required />
+            </label>
+            <label>
+              Password
+              <input
+                type="password"
+                minLength={12}
+                value={form.password}
+                onChange={(event) => setForm({ ...form, password: event.target.value })}
+                required
+              />
+            </label>
+            <button className="submit-button" type="submit" disabled={isSubmitting}>
+              <ShieldCheck size={17} aria-hidden="true" />
+              {isSubmitting ? "Working..." : mode === "signin" ? "Sign in securely" : "Create account"}
+            </button>
+          </form>
+        </section>
       </section>
     </main>
   );
@@ -1003,7 +1022,7 @@ function IdentityView({
         <div className="panel-header">
           <div>
             <p className="eyebrow">Directory</p>
-            <h3>BP Petroleum users</h3>
+            <h3>BP users</h3>
           </div>
           <UserCheck size={22} className="good-icon" aria-hidden="true" />
         </div>
@@ -1114,7 +1133,7 @@ function VehicleTwinView() {
             </button>
           </div>
         </div>
-        <img src="/bp-tanker.svg" alt="BP Petroleum tanker truck" />
+        <img src="/bp-tanker.svg" alt="BP tanker truck" />
       </article>
 
       <article className="panel telemetry-panel">
@@ -1271,7 +1290,7 @@ function FleetCommandCenterView() {
           <MapPinned size={22} className="neutral-icon" aria-hidden="true" />
         </div>
         <div className="command-map">
-          <img src="/bp-terminal-map.svg" alt="BP Petroleum route command map" />
+          <img src="/bp-terminal-map.svg" alt="BP route command map" />
           <div className="map-vehicle-marker">
             <Truck size={18} aria-hidden="true" />
             <strong>{primaryVehicle.registrationNumber}</strong>

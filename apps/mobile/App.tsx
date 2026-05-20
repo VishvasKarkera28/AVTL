@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   SafeAreaView,
-  Image,
   ScrollView,
   Text,
   TextInput,
@@ -94,9 +93,6 @@ import {
 } from "@avtl/domain/api";
 import { colors, styles } from "./src/styles";
 
-declare const require: (path: string) => number;
-
-const flashAvtlLogo = require("./assets/flashavtl-logo.png");
 
 type Section =
   | "foundation"
@@ -137,7 +133,7 @@ export default function App() {
   const [message, setMessage] = useState<MobileMessage>({
     tone: "info",
     text: hasApiConfig(apiConfig)
-      ? "Welcome to FlashAVTL. Sign in to continue to the BP Petroleum command center."
+      ? "Welcome to FlashAVTL. Sign in to continue to the BP workspace."
       : "Welcome to FlashAVTL. Connect the API to unlock live fleet operations."
   });
 
@@ -194,13 +190,8 @@ export default function App() {
     <SafeAreaView style={styles.screen}>
       <StatusBar style="dark" />
       <View style={styles.header}>
-        <Image
-          source={flashAvtlLogo}
-          style={styles.headerLogo}
-          resizeMode="contain"
-          accessibilityLabel="FlashAVTL - Track. Lock. Protect. Everywhere."
-        />
-        <Text style={styles.eyebrow}>BP Petroleum pilot workspace</Text>
+        <MobileBrandLockup />
+        <Text style={styles.eyebrow}>Customer workspace: BP</Text>
         <Text style={styles.subtitle}>
           {organization.name} - {vehicleTwin.registrationNumber}
         </Text>
@@ -276,6 +267,26 @@ export default function App() {
   );
 }
 
+function MobileBrandMark() {
+  return (
+    <View style={styles.mobileBrandMark}>
+      <LockKeyhole size={18} color="#06101E" />
+    </View>
+  );
+}
+
+function MobileBrandLockup() {
+  return (
+    <View style={styles.mobileBrandLockup} accessibilityLabel="FlashAVTL">
+      <MobileBrandMark />
+      <View>
+        <Text style={styles.mobileBrandName}>FlashAVTL</Text>
+        <Text style={styles.mobileBrandTagline}>Track. Lock. Protect.</Text>
+      </View>
+    </View>
+  );
+}
+
 function MobileAuthScreen({
   apiClient,
   message,
@@ -307,12 +318,10 @@ function MobileAuthScreen({
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.content}>
         <Panel eyebrow="FlashAVTL" title="Secure access" icon={ShieldCheck} status={mode}>
-          <Image
-            source={flashAvtlLogo}
-            style={styles.authLogo}
-            resizeMode="contain"
-            accessibilityLabel="FlashAVTL - Track. Lock. Protect. Everywhere."
-          />
+          <View style={styles.authBrandCard}>
+            <MobileBrandLockup />
+            <Text style={styles.authIntroText}>Customer workspace: BP</Text>
+          </View>
           <Text style={styles.subtitle}>{message.text}</Text>
           <View style={styles.actionRow}>
             <TouchableOpacity style={styles.actionButton} onPress={() => setMode("signin")}>
@@ -553,7 +562,7 @@ function IdentityScreen({
         </View>
       </Panel>
 
-      <Panel eyebrow="Directory" title="BP Petroleum users" icon={UserCheck}>
+      <Panel eyebrow="Directory" title="BP users" icon={UserCheck}>
         <View style={styles.rowList}>
           {demoUsers.map((user) => (
             <TouchableOpacity

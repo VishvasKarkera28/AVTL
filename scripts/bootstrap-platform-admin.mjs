@@ -11,9 +11,9 @@ const configSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
   FLASHAVTL_BOOTSTRAP_EMAIL: z.string().email(),
   FLASHAVTL_BOOTSTRAP_PASSWORD: z.string().min(12),
-  FLASHAVTL_BOOTSTRAP_NAME: z.string().min(2).default("BP Petroleum Platform Admin"),
+  FLASHAVTL_BOOTSTRAP_NAME: z.string().min(2).default("BP Workspace Admin"),
   FLASHAVTL_BOOTSTRAP_PHONE: z.string().optional().default(""),
-  FLASHAVTL_BOOTSTRAP_ORG: z.string().min(2).default("BP Petroleum Logistics"),
+  FLASHAVTL_BOOTSTRAP_ORG: z.string().min(2).default("BP"),
   FLASHAVTL_BOOTSTRAP_BRANCH: z.string().min(2).default("Mumbai Fuel Terminal"),
   FLASHAVTL_BOOTSTRAP_VEHICLE_REG: z.string().min(2).default("MH-01-BP-4472"),
   FLASHAVTL_BOOTSTRAP_SKIP_DEMO_VEHICLE: z.string().optional().default("false"),
@@ -60,7 +60,7 @@ async function ensureWorkspace() {
       .from("organizations")
       .insert({
         name: env.FLASHAVTL_BOOTSTRAP_ORG,
-        legal_name: "BP Petroleum Logistics Private Limited",
+        legal_name: "BP",
         country_code: "IN",
         timezone: "Asia/Kolkata",
         status: "active"
@@ -91,7 +91,7 @@ async function ensureWorkspace() {
       .insert({
         organization_id: organization.id,
         name: env.FLASHAVTL_BOOTSTRAP_BRANCH,
-        address: "BP Petroleum coastal fuel terminal, Mumbai, Maharashtra",
+        address: "BP coastal fuel terminal, Mumbai, Maharashtra",
         latitude: 19.076,
         longitude: 72.8777
       })
@@ -183,7 +183,7 @@ async function ensureDemoTruck({ organizationId, branchId }) {
         vin: "BPAVTLDEMO0001",
         vehicle_type: "truck",
         make: "Tata Motors",
-        model: "BP Petroleum Tanker 16KL",
+        model: "BP Tanker 16KL",
         year: 2024,
         status: "available",
         lock_state: "locked",
@@ -228,7 +228,7 @@ async function ensureDemoTruck({ organizationId, branchId }) {
 async function resetDemoData() {
   const demoOrgNames = [
     "HPCL Petroleum Logistics",
-    "BP Petroleum Logistics",
+    "BP",
     env.FLASHAVTL_BOOTSTRAP_ORG
   ];
   const demoEmails = [

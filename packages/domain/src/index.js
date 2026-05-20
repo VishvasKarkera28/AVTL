@@ -17,8 +17,8 @@ export const storageConfig = {
 
 export const organization = {
   id: "7f8a-bp-org",
-  name: "BP Petroleum Logistics",
-  legalName: "BP Petroleum Logistics Private Limited",
+  name: "BP",
+  legalName: "BP",
   tenantCode: "BP-MUMBAI-FLEET",
   status: "active",
   timezone: "Asia/Kolkata",
@@ -40,7 +40,7 @@ export const moduleStatuses = [
     label: "Platform Foundation",
     status: "ready",
     progress: 86,
-    description: "Tenant, RBAC, storage, audit, branch and environment controls are prepared for the BP Petroleum pilot."
+    description: "Tenant, RBAC, storage, audit, branch and environment controls are prepared for the BP customer workspace."
   },
   {
     id: "identity",
@@ -54,7 +54,7 @@ export const moduleStatuses = [
     label: "Vehicle Digital Twin",
     status: "ready",
     progress: 82,
-    description: "The BP Petroleum truck lifecycle, device, documents, telemetry and lock history are available."
+    description: "The BP truck lifecycle, device, documents, telemetry and lock history are available."
   },
   {
     id: "command-center",
@@ -68,7 +68,7 @@ export const moduleStatuses = [
     label: "Smart Access and Locking",
     status: "ready",
     progress: 72,
-    description: "App, BLE, optical, QR, NFC and offline access flows are connected to BP Petroleum role policies."
+    description: "App, BLE, optical, QR, NFC and offline access flows are connected to BP role policies."
   },
   {
     id: "booking",
@@ -186,7 +186,7 @@ export const vehicleTwin = {
   id: "veh-mh01bp4472",
   registrationNumber: "MH-01-BP-4472",
   vin: "BPAVTLTANK4472",
-  displayName: "BP Petroleum Tanker 4472",
+  displayName: "BP Tanker 4472",
   vehicleType: "Petroleum tanker truck",
   make: "Tata Motors",
   model: "LPT 3118 Tanker",
@@ -345,7 +345,7 @@ export const dashboardMetrics = [
   {
     label: "Active tenant",
     value: "1",
-    detail: "BP Petroleum pilot company"
+    detail: "BP customer workspace"
   },
   {
     label: "Verified users",

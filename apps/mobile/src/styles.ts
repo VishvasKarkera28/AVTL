@@ -29,23 +29,47 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.line
   },
-  headerLogo: {
-    width: "100%",
-    height: 118,
-    borderRadius: 8,
-    backgroundColor: "#06101E",
-    borderWidth: 1,
-    borderColor: "#123C48",
-    marginBottom: 12
+  mobileBrandLockup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 10
   },
-  authLogo: {
-    width: "100%",
-    height: 162,
+  mobileBrandMark: {
+    width: 42,
+    height: 42,
     borderRadius: 8,
-    backgroundColor: "#06101E",
+    backgroundColor: colors.amber,
     borderWidth: 1,
-    borderColor: "#123C48",
+    borderColor: "#E2B21D",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  mobileBrandName: {
+    color: colors.ink,
+    fontSize: 22,
+    fontWeight: "900"
+  },
+  mobileBrandTagline: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    marginTop: 2
+  },
+  authBrandCard: {
+    padding: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: "#F8FBFF",
     marginBottom: 14
+  },
+  authIntroText: {
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: "700",
+    marginTop: 4
   },
   eyebrow: {
     color: colors.muted,
