@@ -16,6 +16,7 @@ Use REST for operational commands and standard app workflows. Use realtime chann
 | POST | `/v1/bookings` | Create booking. |
 | POST | `/v1/bookings/{id}/start` | Start trip workflow. |
 | POST | `/v1/bookings/{id}/end` | End trip workflow. |
+| POST | `/api/telemetry-events` | Ingest authenticated tracking telemetry into `telemetry_events`, update `vehicle_latest_state`, and refresh the vehicle current location. |
 | POST | `/v1/access-grants` | Create access grant. |
 | POST | `/v1/access-grants/{id}/offline-token` | Issue offline token. |
 | POST | `/v1/identity/verify` | Start identity verification. |
@@ -48,7 +49,7 @@ Use REST for operational commands and standard app workflows. Use realtime chann
 
 ## Device Telemetry Ingest
 
-`POST /v1/device/telemetry`
+`POST /api/telemetry-events` is available in the current application API for authenticated operators and drivers. Production vehicle boxes can use the same payload contract behind a device-signed gateway.
 
 Headers:
 
@@ -60,21 +61,26 @@ Body:
 
 ```json
 {
-  "sequence": 18421,
-  "recorded_at": "2026-05-20T10:00:00Z",
-  "vehicle_id": "uuid",
-  "location": {
-    "latitude": 12.9141,
-    "longitude": 74.856,
-    "speed_kph": 42.5,
-    "heading_deg": 185
+  "organizationId": "uuid",
+  "vehicleId": "uuid",
+  "deviceId": "uuid",
+  "recordedAt": "2026-05-20T10:00:00Z",
+  "latitude": 19.076,
+  "longitude": 72.8777,
+  "speedKph": 42.5,
+  "headingDeg": 185,
+  "lockState": "locked",
+  "fuelPercent": 63,
+  "batteryPercent": 91,
+  "networkState": "LTE",
+  "healthFlags": {
+    "healthScore": 92,
+    "riskScore": 18
   },
-  "state": {
-    "ignition_on": false,
-    "lock_state": "locked",
-    "fuel_percent": 63
-  },
-  "events": []
+  "payload": {
+    "sequence": 18421,
+    "ignitionOn": false
+  }
 }
 ```
 

@@ -126,6 +126,24 @@ const tripCreateSchema = z.object({
   summary: z.record(z.string(), z.unknown()).default({})
 });
 
+const telemetryEventSchema = z.object({
+  organizationId: z.uuid(),
+  vehicleId: z.uuid(),
+  deviceId: optionalUuid,
+  recordedAt: z.string().min(5).optional().nullable(),
+  latitude: z.union([z.string(), z.number()]).optional().nullable(),
+  longitude: z.union([z.string(), z.number()]).optional().nullable(),
+  speedKph: z.union([z.string(), z.number()]).optional().nullable(),
+  headingDeg: z.union([z.string(), z.number()]).optional().nullable(),
+  odometerKm: z.union([z.string(), z.number()]).optional().nullable(),
+  lockState: z.enum(["locked", "unlocked", "unknown"]).optional().nullable(),
+  fuelPercent: z.union([z.string(), z.number()]).optional().nullable(),
+  batteryPercent: z.union([z.string(), z.number()]).optional().nullable(),
+  networkState: z.string().max(80).optional().nullable(),
+  healthFlags: z.record(z.string(), z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).default({})
+});
+
 const accessGrantCreateSchema = z.object({
   organizationId: z.uuid(),
   vehicleId: z.uuid(),
@@ -477,6 +495,103 @@ app.post("/api/trips", requireUser, requireAnyRole(["platform_admin", "owner", "
     });
 
     res.status(201).json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/telemetry-events", requireUser, requireAnyRole(["platform_admin", "owner", "manager", "staff", "driver"]), async (req, res, next) => {
+  try {
+    const input = telemetryEventSchema.parse(req.body);
+    await assertCanAccessOrganization(req.user.id, input.organizationId, ["platform_admin", "owner", "manager", "staff", "driver"]);
+    const recordedAt = input.recordedAt ? toIsoDateTime(input.recordedAt) : new Date().toISOString();
+    const latitude = toNumberOrNull(input.latitude);
+    const longitude = toNumberOrNull(input.longitude);
+    const speedKph = toNumberOrNull(input.speedKph);
+    const fuelPercent = toNumberOrNull(input.fuelPercent);
+    const batteryPercent = toNumberOrNull(input.batteryPercent);
+
+    const { data: telemetry, error: telemetryError } = await serviceClient
+      .from("telemetry_events")
+      .insert({
+        organization_id: input.organizationId,
+        vehicle_id: input.vehicleId,
+        device_id: input.deviceId ?? null,
+        recorded_at: recordedAt,
+        latitude,
+        longitude,
+        speed_kph: speedKph,
+        odometer_km: toNumberOrNull(input.odometerKm),
+        lock_state: input.lockState ?? null,
+        payload: {
+          ...input.payload,
+          headingDeg: toNumberOrNull(input.headingDeg),
+          batteryPercent,
+          networkState: input.networkState,
+          healthFlags: input.healthFlags
+        }
+      })
+      .select()
+      .single();
+    throwIfSupabase(telemetryError);
+
+    const { error: latestStateError } = await serviceClient
+      .from("vehicle_latest_state")
+      .upsert({
+        vehicle_id: input.vehicleId,
+        device_id: input.deviceId ?? null,
+        recorded_at: recordedAt,
+        latitude,
+        longitude,
+        speed_kph: speedKph,
+        heading_deg: toNumberOrNull(input.headingDeg),
+        ignition_on: Boolean(input.payload?.ignitionOn ?? input.payload?.ignition_on ?? false),
+        lock_state: input.lockState ?? null,
+        fuel_percent: fuelPercent,
+        battery_percent: batteryPercent,
+        network_state: input.networkState ?? null,
+        health_flags: input.healthFlags,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "vehicle_id" });
+    throwIfSupabase(latestStateError);
+
+    const vehiclePatch = {
+      last_seen_at: recordedAt,
+      updated_at: new Date().toISOString()
+    };
+    if (latitude !== null) {
+      vehiclePatch.current_latitude = latitude;
+    }
+    if (longitude !== null) {
+      vehiclePatch.current_longitude = longitude;
+    }
+    if (input.lockState) {
+      vehiclePatch.lock_state = input.lockState;
+    }
+    if (fuelPercent !== null) {
+      vehiclePatch.fuel_percent = fuelPercent;
+    }
+    if (batteryPercent !== null) {
+      vehiclePatch.battery_percent = batteryPercent;
+    }
+
+    const { error: vehicleError } = await serviceClient
+      .from("vehicles")
+      .update(vehiclePatch)
+      .eq("id", input.vehicleId)
+      .eq("organization_id", input.organizationId);
+    throwIfSupabase(vehicleError);
+
+    await writeAudit({
+      organizationId: input.organizationId,
+      actorId: req.user.id,
+      entityType: "vehicle",
+      entityId: input.vehicleId,
+      action: "telemetry_event_ingested",
+      metadata: { speedKph, latitude, longitude }
+    });
+
+    res.status(201).json({ data: telemetry });
   } catch (error) {
     next(error);
   }

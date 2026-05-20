@@ -35,15 +35,13 @@ export const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 10
   },
-  mobileBrandMark: {
-    width: 42,
-    height: 42,
+  mobileBrandImage: {
+    width: 82,
+    height: 54,
     borderRadius: 8,
-    backgroundColor: colors.amber,
+    backgroundColor: "#06101E",
     borderWidth: 1,
-    borderColor: "#E2B21D",
-    alignItems: "center",
-    justifyContent: "center"
+    borderColor: "#123C48"
   },
   mobileBrandName: {
     color: colors.ink,

@@ -180,6 +180,13 @@ export async function createTrip(api, trip) {
   });
 }
 
+export async function createTelemetryEvent(api, event) {
+  return requestData(api, "/api/telemetry-events", {
+    method: "POST",
+    body: event
+  });
+}
+
 export async function createAccessGrant(api, grant) {
   return requestData(api, "/api/access-grants", {
     method: "POST",

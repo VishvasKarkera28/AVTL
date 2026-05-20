@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  Image,
   SafeAreaView,
   ScrollView,
   Text,
@@ -93,6 +94,9 @@ import {
 } from "@avtl/domain/api";
 import { colors, styles } from "./src/styles";
 
+declare const require: (path: string) => number;
+
+const flashAvtlLogo = require("./assets/flashavtl-logo.png");
 
 type Section =
   | "foundation"
@@ -269,9 +273,12 @@ export default function App() {
 
 function MobileBrandMark() {
   return (
-    <View style={styles.mobileBrandMark}>
-      <LockKeyhole size={18} color="#06101E" />
-    </View>
+    <Image
+      source={flashAvtlLogo}
+      style={styles.mobileBrandImage}
+      resizeMode="cover"
+      accessibilityIgnoresInvertColors
+    />
   );
 }
 

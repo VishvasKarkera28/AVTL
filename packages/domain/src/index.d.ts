@@ -341,6 +341,7 @@ export function createFleetAsset(client: any, asset: Record<string, unknown>): P
 export function listFleetAssets(client: any): Promise<any>;
 export function createBooking(client: any, booking: Record<string, unknown>): Promise<any>;
 export function createTrip(client: any, trip: Record<string, unknown>): Promise<any>;
+export function createTelemetryEvent(client: any, event: Record<string, unknown>): Promise<any>;
 export function createAccessGrant(client: any, grant: Record<string, unknown>): Promise<any>;
 export function createDamageReport(client: any, report: Record<string, unknown>): Promise<any>;
 export function uploadFlashAvtlFile(client: any, file: File | Blob, options: Record<string, unknown>): Promise<any>;

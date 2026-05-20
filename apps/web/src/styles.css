@@ -115,6 +115,14 @@ button {
   color: #98a8b4;
 }
 
+.sidebar .brand-lockup {
+  color: #f8fbff;
+}
+
+.sidebar .brand-lockup span {
+  color: #aebcc6;
+}
+
 .nav-stack {
   display: grid;
   gap: 8px;
@@ -189,8 +197,8 @@ button {
   position: relative;
   overflow: hidden;
   background:
-    linear-gradient(135deg, rgba(4, 10, 22, 0.96), rgba(7, 31, 43, 0.94) 52%, rgba(7, 60, 65, 0.88)),
-    #06101e;
+    linear-gradient(135deg, rgba(238, 243, 245, 0.98), rgba(248, 251, 255, 0.96)),
+    #eef3f5;
 }
 
 .auth-screen::before {
@@ -198,11 +206,11 @@ button {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(115deg, transparent 0 48%, rgba(129, 239, 216, 0.12) 48% 49%, transparent 49% 100%),
-    linear-gradient(90deg, rgba(129, 239, 216, 0.06) 0 1px, transparent 1px 118px),
-    linear-gradient(0deg, rgba(240, 168, 8, 0.05) 0 1px, transparent 1px 118px);
+    linear-gradient(115deg, transparent 0 48%, rgba(11, 122, 95, 0.08) 48% 49%, transparent 49% 100%),
+    linear-gradient(90deg, rgba(31, 42, 50, 0.05) 0 1px, transparent 1px 118px),
+    linear-gradient(0deg, rgba(31, 42, 50, 0.04) 0 1px, transparent 1px 118px);
   background-size: 820px 100%, 118px 118px, 118px 118px;
-  opacity: 0.75;
+  opacity: 0.85;
   pointer-events: none;
 }
 
@@ -222,11 +230,10 @@ button {
   justify-content: space-between;
   min-height: 520px;
   padding: 34px;
-  border: 1px solid rgba(129, 239, 216, 0.18);
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(5, 16, 30, 0.54);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(12px);
+  background: #ffffff;
+  box-shadow: var(--shadow);
 }
 
 .auth-panel {
@@ -235,9 +242,9 @@ button {
   justify-content: center;
   min-height: 520px;
   background: #f8fbff;
-  border: 1px solid rgba(129, 239, 216, 0.16);
+  border: 1px solid var(--line);
   border-radius: 8px;
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow);
   padding: 30px;
 }
 
@@ -245,7 +252,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  color: #f8fbff;
+  color: var(--ink);
 }
 
 .brand-lockup strong,
@@ -259,7 +266,7 @@ button {
 }
 
 .brand-lockup span {
-  color: #b9cbd2;
+  color: var(--muted);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0;
@@ -267,16 +274,26 @@ button {
   text-transform: uppercase;
 }
 
-.brand-mark-pro {
-  display: inline-grid;
-  place-items: center;
+.brand-logo-image {
   flex: 0 0 auto;
-  width: 42px;
-  height: 42px;
+  width: 96px;
+  height: 62px;
+  object-fit: cover;
+  object-position: center;
   border-radius: 8px;
-  color: #06101e;
-  background: linear-gradient(135deg, #ffcb2f, #7fe9ce);
-  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(11, 122, 95, 0.16);
+  background: #06101e;
+}
+
+.brand-mark-image {
+  flex: 0 0 auto;
+  width: 54px;
+  height: 38px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #06101e;
 }
 
 .auth-copy {
@@ -286,12 +303,12 @@ button {
 }
 
 .auth-copy .eyebrow {
-  color: #8ff2d3;
+  color: var(--green);
 }
 
 .auth-copy h1 {
   margin: 0;
-  color: #f8fbff;
+  color: var(--ink);
   font-size: 44px;
   line-height: 1.05;
 }
@@ -299,7 +316,7 @@ button {
 .auth-copy p:last-child {
   max-width: 430px;
   margin: 0;
-  color: #c8d8de;
+  color: var(--muted);
   font-size: 16px;
   line-height: 1.55;
 }
@@ -310,20 +327,20 @@ button {
   justify-self: start;
   min-width: 176px;
   padding: 14px 16px;
-  border: 1px solid rgba(129, 239, 216, 0.18);
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  background: #eef3f5;
 }
 
 .workspace-chip span {
-  color: #b9cbd2;
+  color: var(--muted);
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .workspace-chip strong {
-  color: #f8fbff;
+  color: var(--ink);
   font-size: 22px;
 }
 
@@ -616,6 +633,12 @@ button {
 
 .panel h3 {
   font-size: 20px;
+}
+
+.panel-subtext {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .tenant-panel,
@@ -1001,6 +1024,8 @@ code {
 
 .command-map {
   position: relative;
+  overflow: hidden;
+  border-radius: 8px;
 }
 
 .command-map img,
@@ -1013,8 +1038,8 @@ code {
 
 .map-vehicle-marker {
   position: absolute;
-  left: 9%;
-  bottom: 13%;
+  left: var(--marker-x, 12%);
+  top: var(--marker-y, 72%);
   display: grid;
   grid-template-columns: 22px 1fr;
   gap: 2px 8px;
@@ -1025,6 +1050,12 @@ code {
   background: #ffffff;
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
+  transform: translate(-50%, -50%);
+  animation:
+    vehicle-runner 5.8s ease-in-out infinite alternate,
+    marker-pulse 1.8s ease-in-out infinite;
+  animation-delay: var(--runner-delay, 0s), 0s;
+  z-index: 2;
 }
 
 .map-vehicle-marker span {
@@ -1033,6 +1064,105 @@ code {
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.map-route-runner {
+  position: absolute;
+  left: 12%;
+  right: 14%;
+  top: 68%;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(11, 122, 95, 0.62), rgba(240, 168, 8, 0.68), transparent);
+  animation: route-flow 2.8s linear infinite;
+  z-index: 1;
+}
+
+.map-data-badge {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  z-index: 3;
+}
+
+.map-data-badge span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.map-data-badge strong {
+  color: var(--green);
+  font-size: 14px;
+}
+
+.fleet-report-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.fleet-report-row {
+  display: grid;
+  grid-template-columns: 1fr 0.8fr 1fr auto 130px;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.fleet-report-row strong,
+.fleet-report-row span {
+  display: block;
+}
+
+.fleet-report-row span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.fleet-report-row .status-pill {
+  display: inline-flex;
+  color: var(--green);
+  justify-self: start;
+}
+
+@keyframes vehicle-runner {
+  from {
+    transform: translate(-50%, -50%) translateX(calc(var(--runner-range, 16px) * -0.5));
+  }
+  to {
+    transform: translate(-50%, -50%) translateX(var(--runner-range, 16px));
+  }
+}
+
+@keyframes marker-pulse {
+  0%,
+  100% {
+    box-shadow: var(--shadow), 0 0 0 0 rgba(11, 122, 95, 0.22);
+  }
+  50% {
+    box-shadow: var(--shadow), 0 0 0 8px rgba(11, 122, 95, 0);
+  }
+}
+
+@keyframes route-flow {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 220px 0;
+  }
 }
 
 .compact-table,
@@ -1470,6 +1600,7 @@ code {
   .role-row,
   .document-row,
   .compact-row,
+  .fleet-report-row,
   .policy-row,
   .booking-route,
   .trip-progress {

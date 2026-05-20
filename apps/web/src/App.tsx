@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
+import type { CSSProperties, FormEvent } from "react";
 import {
   Activity,
   Bell,
@@ -243,6 +243,22 @@ function App() {
     };
   }, [apiClient]);
 
+  useEffect(() => {
+    if (!apiClient || !session) {
+      return undefined;
+    }
+
+    const refreshLiveAssets = async () => {
+      const result = await listFleetAssets(apiClient);
+      if ((result as any).data) {
+        setLiveAssets((result as any).data);
+      }
+    };
+
+    const interval = window.setInterval(refreshLiveAssets, 5000);
+    return () => window.clearInterval(interval);
+  }, [apiClient, session]);
+
   const navigateToSection = (section: Section) => {
     setActiveSection(section);
     window.history.replaceState(null, "", `#${section}`);
@@ -385,7 +401,12 @@ function App() {
           />
         )}
         {activeSection === "digital-twin" && <VehicleTwinView />}
-        {activeSection === "command-center" && <FleetCommandCenterView />}
+        {activeSection === "command-center" && (
+          <FleetCommandCenterView
+            isApiReady={isApiReady}
+            liveAssets={liveAssets}
+          />
+        )}
         {activeSection === "smart-access" && (
           <SmartAccessView
             apiClient={apiClient}
@@ -421,16 +442,23 @@ function App() {
 
 function BrandMark() {
   return (
-    <span className="brand-mark-pro" aria-hidden="true">
-      <LockKeyhole size={18} />
-    </span>
+    <img
+      className="brand-mark-image"
+      src="/flashavtl-logo.png"
+      alt=""
+      aria-hidden="true"
+    />
   );
 }
 
 function BrandLockup() {
   return (
     <div className="brand-lockup" aria-label="FlashAVTL">
-      <BrandMark />
+      <img
+        className="brand-logo-image"
+        src="/flashavtl-logo.png"
+        alt="FlashAVTL fleet security logo"
+      />
       <div>
         <strong>FlashAVTL</strong>
         <span>Track. Lock. Protect.</span>
@@ -1266,13 +1294,144 @@ function VehicleTwinView() {
   );
 }
 
-function FleetCommandCenterView() {
-  const primaryVehicle = fleetVehicles[0];
+const routeMapBounds = {
+  minLatitude: 18.45,
+  maxLatitude: 19.35,
+  minLongitude: 72.75,
+  maxLongitude: 74.05
+};
+
+function getTrackedVehicles(liveAssets: any[]) {
+  if (!liveAssets.length) {
+    return fleetVehicles;
+  }
+
+  return liveAssets.map((asset, index) => normalizeTrackedVehicle(asset, index));
+}
+
+function buildLiveCommandMetrics(trackedVehicles: any[]) {
+  const movingCount = trackedVehicles.filter((vehicle) => Number(vehicle.speedKph) > 0).length;
+  const lockedCount = trackedVehicles.filter((vehicle) => String(vehicle.lockState).toLowerCase() === "locked").length;
+  const offlineCount = trackedVehicles.filter((vehicle) => String(vehicle.network).toLowerCase().includes("offline")).length;
+
+  return [
+    {
+      label: "Tracked assets",
+      value: String(trackedVehicles.length),
+      detail: "Loaded from Supabase through the FlashAVTL API.",
+      tone: "green"
+    },
+    {
+      label: "Moving now",
+      value: String(movingCount),
+      detail: "Vehicles with live speed above 0 kph.",
+      tone: "blue"
+    },
+    {
+      label: "Locked",
+      value: String(lockedCount),
+      detail: "Latest lock state reported by tracking devices.",
+      tone: "amber"
+    },
+    {
+      label: "Offline",
+      value: String(offlineCount),
+      detail: "Network state from vehicle_latest_state.",
+      tone: "dark"
+    }
+  ];
+}
+
+function normalizeTrackedVehicle(asset: any, index: number) {
+  const fallback = fleetVehicles[index % fleetVehicles.length];
+  const latestState = Array.isArray(asset.vehicle_latest_state)
+    ? asset.vehicle_latest_state[0]
+    : asset.vehicle_latest_state;
+  const healthFlags = latestState?.health_flags ?? {};
+  const fallbackLatitude = toFiniteNumber(fallback.coordinates.latitude, 19.076);
+  const fallbackLongitude = toFiniteNumber(fallback.coordinates.longitude, 72.8777);
+  const latitude = toFiniteNumber(
+    latestState?.latitude ?? asset.current_latitude,
+    fallbackLatitude + index * 0.03
+  );
+  const longitude = toFiniteNumber(
+    latestState?.longitude ?? asset.current_longitude,
+    fallbackLongitude + index * 0.05
+  );
+
+  return {
+    id: asset.id ?? fallback.id,
+    registrationNumber: asset.registration_number ?? fallback.registrationNumber,
+    name: [asset.make, asset.model].filter(Boolean).join(" ") || fallback.name,
+    status: asset.status ?? fallback.status,
+    driver: asset.driver_name ?? fallback.driver ?? "Unassigned",
+    route: asset.route_name ?? fallback.route ?? "Active route",
+    speedKph: Math.round(toFiniteNumber(latestState?.speed_kph, toFiniteNumber(fallback.speedKph, 0))),
+    lockState: latestState?.lock_state ?? asset.lock_state ?? fallback.lockState,
+    fuelPercent: Math.round(toFiniteNumber(latestState?.fuel_percent ?? asset.fuel_percent, toFiniteNumber(fallback.fuelPercent, 0))),
+    healthScore: Math.round(toFiniteNumber(healthFlags.healthScore, fallback.healthScore)),
+    riskScore: Math.round(toFiniteNumber(healthFlags.riskScore, fallback.riskScore)),
+    network: latestState?.network_state ?? fallback.network,
+    lastSeen: formatTrackingTime(latestState?.recorded_at ?? asset.last_seen_at ?? fallback.lastSeen),
+    coordinates: { latitude, longitude }
+  };
+}
+
+function projectVehicleToMap(vehicle: any, index: number) {
+  const latitude = toFiniteNumber(vehicle.coordinates?.latitude, routeMapBounds.minLatitude);
+  const longitude = toFiniteNumber(vehicle.coordinates?.longitude, routeMapBounds.minLongitude);
+  const rawX = ((longitude - routeMapBounds.minLongitude) / (routeMapBounds.maxLongitude - routeMapBounds.minLongitude)) * 100;
+  const rawY = ((routeMapBounds.maxLatitude - latitude) / (routeMapBounds.maxLatitude - routeMapBounds.minLatitude)) * 100;
+
+  return {
+    x: clamp(rawX + index * 1.5, 10, 88),
+    y: clamp(rawY + index * 1.25, 14, 82)
+  };
+}
+
+function toFiniteNumber(value: unknown, fallback: number) {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : fallback;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function formatTrackingTime(value: unknown) {
+  if (!value || typeof value !== "string") {
+    return "Waiting for telemetry";
+  }
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+  return parsed.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function FleetCommandCenterView({
+  isApiReady,
+  liveAssets
+}: {
+  isApiReady: boolean;
+  liveAssets: any[];
+}) {
+  const trackedVehicles = getTrackedVehicles(liveAssets);
+  const primaryVehicle = trackedVehicles[0];
+  const commandMetrics = liveAssets.length ? buildLiveCommandMetrics(trackedVehicles) : fleetCommandMetrics;
+  const feedLabel = isApiReady && liveAssets.length
+    ? "Live database tracking feed"
+    : "Tracking feed waiting for device data";
 
   return (
     <section className="page-grid operations-layout">
       <div className="metric-grid">
-        {fleetCommandMetrics.map((metric) => (
+        {commandMetrics.map((metric) => (
           <article className={`metric-card tone-${metric.tone}`} key={metric.label}>
             <span>{metric.label}</span>
             <strong>{metric.value}</strong>
@@ -1286,15 +1445,33 @@ function FleetCommandCenterView() {
           <div>
             <p className="eyebrow">Live map</p>
             <h3>Fleet command center</h3>
+            <p className="panel-subtext">{feedLabel}</p>
           </div>
           <MapPinned size={22} className="neutral-icon" aria-hidden="true" />
         </div>
         <div className="command-map">
           <img src="/bp-terminal-map.svg" alt="BP route command map" />
-          <div className="map-vehicle-marker">
-            <Truck size={18} aria-hidden="true" />
-            <strong>{primaryVehicle.registrationNumber}</strong>
-            <span>{primaryVehicle.status}</span>
+          <div className="map-route-runner" aria-hidden="true" />
+          {trackedVehicles.map((vehicle, index) => {
+            const position = projectVehicleToMap(vehicle, index);
+            const markerStyle = {
+              "--marker-x": `${position.x}%`,
+              "--marker-y": `${position.y}%`,
+              "--runner-delay": `${index * 0.8}s`,
+              "--runner-range": `${Math.max(10, Math.min(28, Number(vehicle.speedKph) || 12))}px`
+            } as CSSProperties;
+
+            return (
+              <div className="map-vehicle-marker" style={markerStyle} key={vehicle.id}>
+                <Truck size={18} aria-hidden="true" />
+                <strong>{vehicle.registrationNumber}</strong>
+                <span>{vehicle.status} - {vehicle.speedKph} kph</span>
+              </div>
+            );
+          })}
+          <div className="map-data-badge">
+            <span>{trackedVehicles.length} tracked</span>
+            <strong>5s refresh</strong>
           </div>
         </div>
       </article>
@@ -1314,6 +1491,20 @@ function FleetCommandCenterView() {
           <InfoItem icon={RadioTower} label="Network" value={String(primaryVehicle.network)} />
           <InfoItem icon={ShieldAlert} label="Risk" value={`${primaryVehicle.riskScore}/100`} />
           <InfoItem icon={ClipboardCheck} label="Health" value={`${primaryVehicle.healthScore}/100`} />
+        </div>
+        <div className="fleet-report-grid" aria-label="Tracked vehicles report">
+          {trackedVehicles.map((vehicle) => (
+            <div className="fleet-report-row" key={vehicle.id}>
+              <div>
+                <strong>{vehicle.registrationNumber}</strong>
+                <span>{vehicle.name}</span>
+              </div>
+              <span>{vehicle.driver}</span>
+              <span>{vehicle.route}</span>
+              <span className="status-pill success">{vehicle.status}</span>
+              <span>{vehicle.lastSeen}</span>
+            </div>
+          ))}
         </div>
       </article>
 
