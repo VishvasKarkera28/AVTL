@@ -3,9 +3,11 @@ import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
 
 const appModule = (path: string) => fileURLToPath(new URL(path, import.meta.url));
+const workspaceRoot = fileURLToPath(new URL("../..", import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
+  envDir: workspaceRoot,
   resolve: {
     dedupe: ["react", "react-dom"],
     alias: [
