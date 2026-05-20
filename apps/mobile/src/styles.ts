@@ -29,6 +29,24 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.line
   },
+  headerLogo: {
+    width: "100%",
+    height: 118,
+    borderRadius: 8,
+    backgroundColor: "#06101E",
+    borderWidth: 1,
+    borderColor: "#123C48",
+    marginBottom: 12
+  },
+  authLogo: {
+    width: "100%",
+    height: 162,
+    borderRadius: 8,
+    backgroundColor: "#06101E",
+    borderWidth: 1,
+    borderColor: "#123C48",
+    marginBottom: 14
+  },
   eyebrow: {
     color: colors.muted,
     fontSize: 12,

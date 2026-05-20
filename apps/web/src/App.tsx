@@ -276,11 +276,11 @@ function App() {
     <div className="app-shell">
       <aside className="sidebar" aria-label="Primary navigation">
         <div className="brand-block">
-          <div className="brand-mark">FF</div>
-          <div>
-            <p className="eyebrow">FlashFleet AI</p>
-            <h1>AVTL Console</h1>
-          </div>
+          <img
+            className="brand-logo"
+            src="/flashavtl-logo.png"
+            alt="FlashAVTL - Track. Lock. Protect. Everywhere."
+          />
         </div>
 
         <nav className="nav-stack">
@@ -318,9 +318,16 @@ function App() {
 
       <main className="content-area">
         <header className="topbar">
-          <div>
-            <p className="eyebrow">HPCL pilot workspace</p>
-            <h2>{navigation.find((item) => item.id === activeSection)?.label}</h2>
+          <div className="topbar-title">
+            <img
+              className="topbar-logo"
+              src="/flashavtl-logo.png"
+              alt="FlashAVTL"
+            />
+            <div>
+              <p className="eyebrow">HPCL pilot workspace</p>
+              <h2>{navigation.find((item) => item.id === activeSection)?.label}</h2>
+            </div>
           </div>
           <div className="topbar-actions">
             <label className="search-box">
@@ -461,11 +468,11 @@ function AuthScreen({
     <main className="auth-screen">
       <section className="auth-panel">
         <div className="brand-block">
-          <div className="brand-mark">FF</div>
-          <div>
-            <p className="eyebrow">FlashFleet AI</p>
-            <h1>Secure Access</h1>
-          </div>
+          <img
+            className="brand-logo auth-logo"
+            src="/flashavtl-logo.png"
+            alt="FlashAVTL - Track. Lock. Protect. Everywhere."
+          />
         </div>
         <p className={`message ${appMessage.tone}`}>{appMessage.text}</p>
         <div className="segmented-control">

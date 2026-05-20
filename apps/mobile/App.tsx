@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   SafeAreaView,
+  Image,
   ScrollView,
   Text,
   TextInput,
@@ -90,6 +91,10 @@ import {
   signUpUser
 } from "@avtl/domain/repositories";
 import { colors, styles } from "./src/styles";
+
+declare const require: (path: string) => number;
+
+const flashAvtlLogo = require("./assets/flashavtl-logo.png");
 
 type Section =
   | "foundation"
@@ -189,8 +194,13 @@ export default function App() {
     <SafeAreaView style={styles.screen}>
       <StatusBar style="dark" />
       <View style={styles.header}>
+        <Image
+          source={flashAvtlLogo}
+          style={styles.headerLogo}
+          resizeMode="contain"
+          accessibilityLabel="FlashAVTL - Track. Lock. Protect. Everywhere."
+        />
         <Text style={styles.eyebrow}>HPCL pilot workspace</Text>
-        <Text style={styles.title}>FlashFleet AI</Text>
         <Text style={styles.subtitle}>
           {organization.name} - {vehicleTwin.registrationNumber}
         </Text>
@@ -296,7 +306,13 @@ function MobileAuthScreen({
     <SafeAreaView style={styles.screen}>
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.content}>
-        <Panel eyebrow="Secure access" title="FlashFleet AI" icon={ShieldCheck} status={mode}>
+        <Panel eyebrow="FlashAVTL" title="Secure access" icon={ShieldCheck} status={mode}>
+          <Image
+            source={flashAvtlLogo}
+            style={styles.authLogo}
+            resizeMode="contain"
+            accessibilityLabel="FlashAVTL - Track. Lock. Protect. Everywhere."
+          />
           <Text style={styles.subtitle}>{message.text}</Text>
           <View style={styles.actionRow}>
             <TouchableOpacity style={styles.actionButton} onPress={() => setMode("signin")}>
