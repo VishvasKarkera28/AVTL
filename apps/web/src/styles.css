@@ -186,29 +186,77 @@ button {
   place-items: center;
   min-height: 100vh;
   padding: 24px;
-  background: #eef3f5;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(4, 9, 22, 0.96), rgba(5, 27, 42, 0.94) 48%, rgba(4, 52, 60, 0.96)),
+    #04101e;
+}
+
+.auth-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(115deg, transparent 0 46%, rgba(129, 239, 216, 0.18) 46% 47%, transparent 47% 100%),
+    linear-gradient(90deg, rgba(240, 168, 8, 0.14) 0 1px, transparent 1px 130px),
+    linear-gradient(0deg, rgba(129, 239, 216, 0.1) 0 1px, transparent 1px 130px);
+  background-size: 780px 100%, 130px 130px, 130px 130px;
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.auth-screen::after {
+  content: "";
+  position: absolute;
+  inset: 4% 0 0 52%;
+  background: url("/flashavtl-logo.png") center / min(560px, 46vw) no-repeat;
+  opacity: 0.09;
+  pointer-events: none;
 }
 
 .auth-panel {
+  position: relative;
+  z-index: 1;
   width: min(520px, 100%);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: rgba(5, 16, 30, 0.82);
+  border: 1px solid rgba(129, 239, 216, 0.22);
   border-radius: 8px;
-  box-shadow: var(--shadow);
-  padding: 22px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+  padding: 24px;
+  backdrop-filter: blur(18px);
 }
 
 .auth-panel .brand-block {
   justify-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .auth-logo {
   max-width: 360px;
 }
 
-.auth-panel h1 {
+.auth-copy {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.auth-copy .eyebrow {
+  color: #8ff2d3;
+}
+
+.auth-copy h1 {
   margin: 0;
+  color: #f8fbff;
+  font-size: 28px;
+}
+
+.auth-copy p:last-child {
+  margin: 0;
+  color: #c8d8de;
+  line-height: 1.45;
 }
 
 .message,
@@ -220,18 +268,21 @@ button {
 
 .message {
   margin: 0 0 14px;
-  color: var(--muted);
-  background: #f4f7f8;
+  color: #d7e8ee;
+  background: rgba(129, 239, 216, 0.09);
+  border-color: rgba(129, 239, 216, 0.18);
 }
 
 .message.success {
-  color: var(--green);
-  background: var(--green-soft);
+  color: #8ff2d3;
+  background: rgba(11, 122, 95, 0.22);
+  border-color: rgba(143, 242, 211, 0.26);
 }
 
 .message.error {
-  color: var(--red);
-  background: #ffe8ea;
+  color: #ffd5d9;
+  background: rgba(211, 33, 45, 0.18);
+  border-color: rgba(255, 184, 191, 0.28);
 }
 
 .segmented-control {
@@ -257,8 +308,35 @@ button {
 
 .segmented-control button.active,
 .submit-button {
-  color: #ffffff;
-  background: #22313f;
+  color: #06101e;
+  background: #ffcb2f;
+}
+
+.auth-panel .segmented-control button {
+  color: #d7e8ee;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(129, 239, 216, 0.14);
+}
+
+.auth-panel .segmented-control button.active,
+.auth-panel .submit-button {
+  color: #06101e;
+  background: #ffcb2f;
+}
+
+.auth-panel .form-grid label {
+  color: #b9cbd2;
+}
+
+.auth-panel .form-grid input {
+  color: #f8fbff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(129, 239, 216, 0.2);
+}
+
+.auth-panel .form-grid input:focus {
+  outline: 2px solid rgba(255, 203, 47, 0.42);
+  outline-offset: 1px;
 }
 
 .live-security-bar {

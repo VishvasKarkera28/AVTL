@@ -137,8 +137,8 @@ export default function App() {
   const [message, setMessage] = useState<MobileMessage>({
     tone: "info",
     text: hasApiConfig(apiConfig)
-      ? "FlashAVTL JWT mode is enabled. Sign in to use live workflows through the API."
-      : "Demo mode is active. Add EXPO_PUBLIC_API_URL to connect live data."
+      ? "Welcome to FlashAVTL. Sign in to continue to the BP Petroleum command center."
+      : "Welcome to FlashAVTL. Connect the API to unlock live fleet operations."
   });
 
   const apiClient = useMemo(() => createFlashAvtlApiClient(apiConfig), []);
@@ -205,7 +205,7 @@ export default function App() {
           {organization.name} - {vehicleTwin.registrationNumber}
         </Text>
         <Text style={styles.securityText}>
-          {isApiReady ? `JWT ${session ? "active" : "pending"}` : "Demo mode"} - {message.text}
+          {isApiReady ? `Session ${session ? "active" : "ready"}` : "Demo mode"} - {message.text}
         </Text>
         {session && (
           <TouchableOpacity
@@ -299,7 +299,7 @@ function MobileAuthScreen({
       : await signUpUser(apiClient, form);
     setMessage(result.error
       ? { tone: "error", text: result.error.message }
-      : { tone: "success", text: mode === "signin" ? "Signed in with FlashAVTL application JWT." : "Account created." });
+      : { tone: "success", text: mode === "signin" ? "Welcome back. Loading your fleet workspace." : "Account created." });
   };
 
   return (

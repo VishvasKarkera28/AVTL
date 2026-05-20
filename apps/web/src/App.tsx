@@ -166,8 +166,8 @@ function App() {
   const [appMessage, setAppMessage] = useState<AppMessage>({
     tone: "info",
     text: hasApiConfig(apiConfig)
-      ? "FlashAVTL JWT mode is enabled. Sign in to use live data through the application API."
-      : "Demo mode is active. Add VITE_API_URL to connect the FlashAVTL API."
+      ? "Sign in to continue to the BP Petroleum command center."
+      : "Welcome to FlashAVTL. Connect the API to unlock live fleet operations."
   });
 
   const apiClient = useMemo(() => createFlashAvtlApiClient(apiConfig), []);
@@ -460,7 +460,7 @@ function AuthScreen({
 
     setAppMessage({
       tone: "success",
-      text: mode === "signin" ? "Signed in with FlashAVTL application JWT." : "Account created with FlashAVTL application authentication."
+      text: mode === "signin" ? "Welcome back. Loading your fleet workspace." : "Account created. Your secure fleet workspace is ready."
     });
   };
 
@@ -473,6 +473,11 @@ function AuthScreen({
             src="/flashavtl-logo.png"
             alt="FlashAVTL - Track. Lock. Protect. Everywhere."
           />
+        </div>
+        <div className="auth-copy">
+          <p className="eyebrow">Welcome</p>
+          <h1>Welcome to FlashAVTL</h1>
+          <p>Track, lock, and protect every BP Petroleum asset from one secure command center.</p>
         </div>
         <p className={`message ${appMessage.tone}`}>{appMessage.text}</p>
         <div className="segmented-control">
@@ -544,7 +549,7 @@ function LiveSecurityBar({
         <span>{appMessage.text}</span>
       </div>
       <div className="security-kpis">
-        <span>JWT: {session ? "active" : "demo"}</span>
+        <span>Session: {session ? "active" : "ready"}</span>
         <span>Roles: {userContext?.roles?.length ?? 0}</span>
         <span>Live assets: {liveAssets.length}</span>
         {session && (
