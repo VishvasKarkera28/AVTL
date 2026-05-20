@@ -1,6 +1,10 @@
 import "dotenv/config";
+import crypto from "node:crypto";
+import { promisify } from "node:util";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+
+const scrypt = promisify(crypto.scrypt);
 
 const configSchema = z.object({
   SUPABASE_URL: z.string().url(),
@@ -25,7 +29,7 @@ const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
 });
 
 const { organizationId, branchId } = await ensureWorkspace();
-const adminUserId = await ensureAdminUser(organizationId);
+const adminUserId = await ensureAdminUser(organizationId, branchId);
 await ensurePlatformAdminRole({ organizationId, branchId, userId: adminUserId });
 
 if (env.FLASHAVTL_BOOTSTRAP_SKIP_DEMO_VEHICLE !== "true") {
@@ -99,55 +103,52 @@ async function ensureWorkspace() {
   return { organizationId: organization.id, branchId: branch.id };
 }
 
-async function ensureAdminUser(organizationId) {
+async function ensureAdminUser(organizationId, branchId) {
+  const { data: existingUser, error: userError } = await supabase
+    .from("app_users")
+    .select("id")
+    .eq("email", env.FLASHAVTL_BOOTSTRAP_EMAIL)
+    .limit(1)
+    .maybeSingle();
+  throwIf(userError, "Could not read app users");
+
+  if (existingUser?.id) {
+    return existingUser.id;
+  }
+
   const { data: existingProfile, error: profileError } = await supabase
     .from("profiles")
     .select("id")
     .eq("email", env.FLASHAVTL_BOOTSTRAP_EMAIL)
     .limit(1)
     .maybeSingle();
-  throwIf(profileError, "Could not read profiles");
+  throwIf(profileError, "Could not read legacy profiles");
 
-  if (existingProfile?.id) {
-    return existingProfile.id;
-  }
+  const passwordHash = await hashPassword(env.FLASHAVTL_BOOTSTRAP_PASSWORD);
 
-  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-    email: env.FLASHAVTL_BOOTSTRAP_EMAIL,
-    password: env.FLASHAVTL_BOOTSTRAP_PASSWORD,
-    email_confirm: true,
-    user_metadata: {
-      full_name: env.FLASHAVTL_BOOTSTRAP_NAME,
-      phone: env.FLASHAVTL_BOOTSTRAP_PHONE || null
-    },
-    app_metadata: {
+  const { data: userData, error: insertError } = await supabase
+    .from("app_users")
+    .insert({
       organization_id: organizationId,
-      role: "platform_admin"
-    }
-  });
-  throwIf(authError, "Could not create Supabase Auth user");
+      branch_id: branchId,
+      profile_id: existingProfile?.id ?? null,
+      email: env.FLASHAVTL_BOOTSTRAP_EMAIL,
+      password_hash: passwordHash,
+      full_name: env.FLASHAVTL_BOOTSTRAP_NAME,
+      phone: env.FLASHAVTL_BOOTSTRAP_PHONE || null,
+      identity_status: "verified",
+      mfa_enabled: false,
+      status: "active"
+    })
+    .select("id")
+    .single();
+  throwIf(insertError, "Could not create app admin user");
 
-  const userId = authData.user?.id;
-  if (!userId) {
-    throw new Error("Supabase Auth did not return a user id.");
-  }
-
-  const { error: profileInsertError } = await supabase.from("profiles").insert({
-    id: userId,
-    organization_id: organizationId,
-    full_name: env.FLASHAVTL_BOOTSTRAP_NAME,
-    phone: env.FLASHAVTL_BOOTSTRAP_PHONE || null,
-    email: env.FLASHAVTL_BOOTSTRAP_EMAIL,
-    identity_status: "verified",
-    mfa_enabled: false
-  });
-  throwIf(profileInsertError, "Could not create admin profile");
-
-  return userId;
+  return userData.id;
 }
 
 async function ensurePlatformAdminRole({ organizationId, branchId, userId }) {
-  const { error } = await supabase.from("user_roles").upsert({
+  const { error } = await supabase.from("app_user_roles").upsert({
     organization_id: organizationId,
     branch_id: branchId,
     user_id: userId,
@@ -223,4 +224,11 @@ function throwIf(error, prefix) {
   if (error) {
     throw new Error(`${prefix}: ${error.message}`);
   }
+}
+
+async function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString("base64url");
+  const params = { N: 16384, r: 8, p: 1, keylen: 64 };
+  const derivedKey = await scrypt(password, salt, params.keylen, { N: params.N, r: params.r, p: params.p });
+  return `scrypt$${params.N}$${params.r}$${params.p}$${salt}$${derivedKey.toString("base64url")}`;
 }

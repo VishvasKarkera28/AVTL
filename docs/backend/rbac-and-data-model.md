@@ -2,7 +2,7 @@
 
 ## Data Ownership
 
-Every operational record belongs to one organization unless it is a platform-level configuration record. This keeps Supabase RLS policies simple and prevents data leakage across fleet operators.
+Every operational record belongs to one organization unless it is a platform-level configuration record. The FlashAVTL API enforces tenant and role checks before using Supabase as the data store.
 
 ## Main Entities
 
@@ -10,8 +10,9 @@ Every operational record belongs to one organization unless it is a platform-lev
 | --- | --- |
 | Organization | Tenant company using the platform. |
 | Branch | Physical branch, depot, or city operation. |
-| Profile | Application user tied to Supabase Auth. |
-| User Role | Role assignment within organization and optional branch. |
+| App User | Application login user with a password hash and JWT identity. |
+| App User Role | Role assignment within organization and optional branch. |
+| Profile | Optional legacy profile link for existing profile-based records. |
 | Vehicle | Fleet asset. |
 | Vehicle Device | Installed FlashFleet hardware box. |
 | Vehicle Latest State | Fast lookup state for command center. |
@@ -26,11 +27,11 @@ Every operational record belongs to one organization unless it is a platform-lev
 | Damage Report | Human and AI damage evidence. |
 | Audit Log | Append-only security and compliance record. |
 
-## RLS Strategy
+## Authorization Strategy
 
-- Operators can read records inside their organization.
-- Customers can only read their own bookings and currently assigned vehicles.
-- Drivers can only read assigned trips and vehicle access windows.
+- Operators can read records inside their organization through API-scoped queries.
+- Customers can only read or create their own bookings and currently assigned vehicles.
+- Drivers can only read or create assigned trips and vehicle access windows.
 - Maintenance users can read assigned vehicles and maintenance data.
 - Platform admins can read across organizations through service-side admin APIs.
 
@@ -49,7 +50,7 @@ Every operational record belongs to one organization unless it is a platform-lev
 
 ## API Authentication
 
-- Mobile and web apps use Supabase Auth JWT.
+- Mobile and web apps use FlashAVTL application JWTs issued by `services/api`.
 - Vehicle boxes use mutual TLS or signed device JWTs.
 - Backend services use private service credentials and network restrictions.
 - Sensitive commands require signed command payloads, not only HTTPS transport.

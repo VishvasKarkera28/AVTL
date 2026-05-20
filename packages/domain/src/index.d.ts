@@ -322,22 +322,25 @@ export function createFlashAvtlClient(config: {
 }): any;
 export function toAppError(error: unknown): any;
 
-export function getAuthSession(supabase: any): Promise<any>;
-export function signInWithPassword(supabase: any, params: { email: string; password: string }): Promise<any>;
+export function hasApiConfig(config: { baseUrl?: string } | null | undefined): boolean;
+export function createFlashAvtlApiClient(config: { baseUrl?: string; storageKey?: string }): any;
+
+export function getAuthSession(client: any): Promise<any>;
+export function signInWithPassword(client: any, params: { email: string; password: string }): Promise<any>;
 export function signUpUser(
-  supabase: any,
-  params: { email: string; password: string; fullName: string; phone?: string }
+  client: any,
+  params: { email: string; password: string; fullName: string; phone?: string; organizationId?: string; branchId?: string }
 ): Promise<any>;
-export function signOut(supabase: any): Promise<any>;
-export function onAuthStateChange(supabase: any, callback: (event: string, session: any) => void): () => void;
-export function getCurrentUserContext(supabase: any): Promise<any>;
-export function listOrganizations(supabase: any): Promise<any>;
-export function listAssetTypes(supabase: any): Promise<any>;
-export function createUserInvitation(supabase: any, invitation: Record<string, unknown>): Promise<any>;
-export function createFleetAsset(supabase: any, asset: Record<string, unknown>): Promise<any>;
-export function listFleetAssets(supabase: any): Promise<any>;
-export function createBooking(supabase: any, booking: Record<string, unknown>): Promise<any>;
-export function createTrip(supabase: any, trip: Record<string, unknown>): Promise<any>;
-export function createAccessGrant(supabase: any, grant: Record<string, unknown>): Promise<any>;
-export function createDamageReport(supabase: any, report: Record<string, unknown>): Promise<any>;
-export function uploadFlashAvtlFile(supabase: any, file: File | Blob, options: Record<string, unknown>): Promise<any>;
+export function signOut(client: any): Promise<any>;
+export function onAuthStateChange(client: any, callback: (event: string, session: any) => void): () => void;
+export function getCurrentUserContext(client: any): Promise<any>;
+export function listOrganizations(client: any): Promise<any>;
+export function listAssetTypes(client: any): Promise<any>;
+export function createUserInvitation(client: any, invitation: Record<string, unknown>): Promise<any>;
+export function createFleetAsset(client: any, asset: Record<string, unknown>): Promise<any>;
+export function listFleetAssets(client: any): Promise<any>;
+export function createBooking(client: any, booking: Record<string, unknown>): Promise<any>;
+export function createTrip(client: any, trip: Record<string, unknown>): Promise<any>;
+export function createAccessGrant(client: any, grant: Record<string, unknown>): Promise<any>;
+export function createDamageReport(client: any, report: Record<string, unknown>): Promise<any>;
+export function uploadFlashAvtlFile(client: any, file: File | Blob, options: Record<string, unknown>): Promise<any>;

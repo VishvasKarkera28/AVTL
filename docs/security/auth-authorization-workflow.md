@@ -1,13 +1,14 @@
 # JWT Authentication and Authorization Workflow
 
-FlashAVTL uses Supabase Auth for user identity, PostgreSQL RLS for tenant-safe table access, private Supabase Storage for files, and a small Node API for operations that require the service-role key.
+FlashAVTL uses application-owned JWT authentication for user identity and authorization. Supabase is used for PostgreSQL data and private Storage behind the FlashAVTL API; web and mobile clients do not sign in with Supabase Auth.
 
 ## Key Rules
 
-- Web and mobile apps only receive the Supabase anon key.
+- Web and mobile apps only receive `VITE_API_URL` / `EXPO_PUBLIC_API_URL`.
 - The Supabase service-role key is only used by `services/api`.
-- Every authenticated request carries a Supabase JWT.
-- Database access is protected by RLS policies tied to `user_roles`.
+- Every authenticated request carries a FlashAVTL application JWT.
+- API authorization is based on `app_users` and `app_user_roles`.
+- Database RLS remains enabled, but client writes go through API-side RBAC with the service role.
 - Storage uses one private bucket, `FlashAVTLStorage`, with controlled folder prefixes.
 - Firmware upload and admin user provisioning must go through the backend API.
 
@@ -17,25 +18,20 @@ FlashAVTL uses Supabase Auth for user identity, PostgreSQL RLS for tenant-safe t
 sequenceDiagram
     participant User as "User"
     participant App as "Web or Mobile App"
-    participant Auth as "Supabase Auth"
-    participant DB as "Postgres with RLS"
-    participant Storage as "FlashAVTLStorage"
     participant API as "FlashAVTL API"
+    participant DB as "Supabase Postgres"
+    participant Storage as "FlashAVTLStorage"
 
     User->>App: Enter email and password
-    App->>Auth: signInWithPassword
-    Auth-->>App: Session with access JWT
-    App->>DB: CRUD request with JWT
-    DB->>DB: Evaluate RLS using auth.uid()
-    DB-->>App: Allowed tenant data only
-    App->>Storage: Upload/read allowed folder object
-    Storage->>Storage: Evaluate storage RLS policies
-    Storage-->>App: Allowed file operation
-    App->>API: Admin or signed-upload request with Bearer JWT
-    API->>Auth: Verify JWT
-    API->>DB: Check user_roles
-    API->>DB: Service-role write when allowed
-    API-->>App: Result
+    App->>API: POST /api/auth/login
+    API->>DB: Verify app_users password hash
+    API->>DB: Load app_user_roles
+    API-->>App: FlashAVTL JWT
+    App->>API: CRUD request with Bearer JWT
+    API->>API: Verify JWT and role scope
+    API->>DB: Service-role read/write when allowed
+    API->>Storage: Create signed upload URL when allowed
+    API-->>App: Tenant-scoped result
 ```
 
 ## Roles
@@ -54,33 +50,33 @@ sequenceDiagram
 
 ### Sign In
 
-1. App calls Supabase Auth with email and password.
-2. Supabase returns a session and JWT.
-3. App loads `profiles` and `user_roles`.
-4. UI enables module actions based on role and live RLS results.
+1. App calls `POST /api/auth/login` with email and password.
+2. API verifies the `app_users.password_hash` value.
+3. API loads `app_user_roles` and returns a signed FlashAVTL JWT.
+4. UI enables module actions based on the JWT-backed role context returned by `/api/auth/me`.
 
 ### Create User
 
 1. Admin uses the web or mobile create-user form for invitation tracking.
-2. For production Auth user creation, call `POST /api/admin/users`.
-3. API verifies the caller JWT.
+2. The form calls `POST /api/admin/users`.
+3. API verifies the FlashAVTL JWT.
 4. API checks `platform_admin`, `owner`, or `manager`.
-5. API uses the service-role key to create/invite the Supabase Auth user.
-6. API writes `profiles`, `user_roles`, `user_invitations`, and `audit_logs`.
+5. API creates or updates `app_users`.
+6. API writes `app_user_roles`, `user_invitations`, and `audit_logs`.
 
 ### Create Vehicle, Bus, Truck, Ship, or Equipment
 
 1. Operator selects an asset type from `asset_types`.
-2. App inserts into `vehicles`.
-3. RLS allows only fleet operators for the organization.
+2. App calls `POST /api/fleet-assets`.
+3. API allows only fleet operators for the organization.
 4. Future device provisioning writes to `vehicle_devices` through an admin workflow.
 
 ### Upload Files
 
-1. App uploads to `FlashAVTLStorage` using one allowed prefix.
-2. App writes metadata to `storage_files`.
-3. For sensitive or large uploads, app requests `POST /api/storage/signed-upload`.
-4. API validates role and section before creating a signed upload URL.
+1. App requests `POST /api/storage/signed-upload`.
+2. API validates role and section before creating a signed upload URL.
+3. App uploads to `FlashAVTLStorage` using the signed URL.
+4. API records metadata in `storage_files`.
 
 Allowed prefixes:
 
@@ -95,21 +91,19 @@ Allowed prefixes:
 Frontend:
 
 ```bash
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
-EXPO_PUBLIC_SUPABASE_URL=
-EXPO_PUBLIC_SUPABASE_ANON_KEY=
+VITE_API_URL=http://localhost:8787
+EXPO_PUBLIC_API_URL=http://localhost:8787
 ```
 
 Backend API:
 
 ```bash
 SUPABASE_URL=
-SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+APP_JWT_SECRET=
+APP_JWT_EXPIRES_SECONDS=28800
 PORT=8787
 CORS_ORIGINS=http://localhost:3000
-AUTH_REDIRECT_URL=http://localhost:3000
 ```
 
 ## Production Hardening
@@ -117,6 +111,7 @@ AUTH_REDIRECT_URL=http://localhost:3000
 - Enable MFA for `platform_admin`, `owner`, and `manager`.
 - Add rate limits to `services/api`.
 - Keep service-role secrets out of Vite, Expo, and client bundles.
+- Rotate `APP_JWT_SECRET` with a key-id strategy before multi-tenant production rollout.
 - Use short-lived signed upload URLs for sensitive media.
-- Add RLS tests for every role before launch.
+- Add API authorization tests for every role before launch.
 - Audit every command that can lock, unlock, immobilize, upload firmware, or modify user roles.

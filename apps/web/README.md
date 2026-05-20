@@ -4,7 +4,7 @@ Target stack: React or Next.js.
 
 Current implementation: Vite, React, TypeScript, and shared `@avtl/domain` demo data.
 
-When `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are configured, the console switches from demo mode to live Supabase mode and requires sign in.
+When `VITE_API_URL` is configured, the console signs in through the FlashAVTL API with an application JWT. Supabase is used behind the API for tables and storage only.
 
 ## Console Areas
 
@@ -40,9 +40,9 @@ When `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are configured, the consol
 - Trip Tracking
 - Inspection and Damage Intelligence
 
-## Live Supabase Forms
+## Live API Forms
 
-- Sign in and sign up using Supabase Auth.
+- Sign in and sign up using FlashAVTL application JWT authentication.
 - Invite users into company roles.
 - Create fleet assets such as truck, bus, car, bike, van, ship, and equipment.
 - Create access grants with app, Bluetooth, optical, NFC, QR, and offline token methods.
@@ -59,8 +59,7 @@ npm run dev:web
 Required live-mode variables:
 
 ```bash
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
+VITE_API_URL=http://localhost:8787
 ```
 
 Open:

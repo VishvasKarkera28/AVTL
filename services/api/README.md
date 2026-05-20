@@ -2,7 +2,7 @@
 
 Target stack: Node.js or TypeScript services with Supabase.
 
-Current implementation: Node.js, Express, Supabase service-role client, JWT verification, admin user creation, and signed upload URL creation.
+Current implementation: Node.js, Express, application-owned JWT authentication, Supabase service-role data access, admin user creation, CRUD routes, and signed upload URL creation.
 
 ## Services
 
@@ -38,8 +38,12 @@ Current implementation: Node.js, Express, Supabase service-role client, JWT veri
 ## Implemented Routes
 
 - `GET /health` - service health check.
-- `GET /api/me` - verifies Bearer JWT and returns user roles.
-- `POST /api/admin/users` - creates or invites Supabase Auth users, then writes profile, role, invitation, and audit records.
+- `POST /api/auth/login` - verifies an app user password and returns a FlashAVTL JWT.
+- `POST /api/auth/register` - creates a customer app user and returns a FlashAVTL JWT.
+- `GET /api/me` and `GET /api/auth/me` - verify Bearer JWT and return app user roles.
+- `GET /api/asset-types` and `GET /api/fleet-assets` - read live Supabase data through API authorization.
+- `POST /api/admin/users` - creates app users, roles, invitation records, and audit logs.
+- `POST /api/fleet-assets`, `/api/bookings`, `/api/trips`, `/api/access-grants`, `/api/damage-reports` - write production module data.
 - `POST /api/storage/signed-upload` - validates role and storage section before creating a signed upload URL.
 
 ## Run
@@ -51,10 +55,9 @@ npm run dev:api
 Required environment variables:
 
 - `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `APP_JWT_SECRET`
 - `WEB_APP_URL`
 - `CORS_ORIGINS`
-- `AUTH_REDIRECT_URL`
 
 Security note: never expose `SUPABASE_SERVICE_ROLE_KEY` to web or mobile apps. It belongs only in this API service or Supabase Edge Functions.

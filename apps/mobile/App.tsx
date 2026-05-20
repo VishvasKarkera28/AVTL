@@ -75,8 +75,10 @@ import {
   vehicleTwin
 } from "@avtl/domain";
 import type { DemoUser } from "@avtl/domain";
-import { createFlashAvtlClient, hasSupabaseConfig } from "@avtl/domain/supabase";
 import {
+  createFlashAvtlApiClient,
+  getAuthSession,
+  hasApiConfig,
   createAccessGrant,
   createBooking,
   createDamageReport,
@@ -89,7 +91,7 @@ import {
   signInWithPassword,
   signOut,
   signUpUser
-} from "@avtl/domain/repositories";
+} from "@avtl/domain/api";
 import { colors, styles } from "./src/styles";
 
 declare const require: (path: string) => number;
@@ -122,10 +124,8 @@ type MobileMessage = {
   text: string;
 };
 
-const supabaseConfig = {
-  url: process.env.EXPO_PUBLIC_SUPABASE_URL,
-  anonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
-  detectSessionInUrl: false
+const apiConfig = {
+  baseUrl: process.env.EXPO_PUBLIC_API_URL || "http://localhost:8787"
 };
 
 export default function App() {
@@ -136,13 +136,13 @@ export default function App() {
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
   const [message, setMessage] = useState<MobileMessage>({
     tone: "info",
-    text: hasSupabaseConfig(supabaseConfig)
-      ? "Supabase mode is enabled. Sign in to use live workflows."
-      : "Demo mode is active. Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to connect live data."
+    text: hasApiConfig(apiConfig)
+      ? "FlashAVTL JWT mode is enabled. Sign in to use live workflows through the API."
+      : "Demo mode is active. Add EXPO_PUBLIC_API_URL to connect live data."
   });
 
-  const supabase = useMemo(() => createFlashAvtlClient(supabaseConfig), []);
-  const isSupabaseReady = Boolean(supabase);
+  const apiClient = useMemo(() => createFlashAvtlApiClient(apiConfig), []);
+  const isApiReady = Boolean(apiClient);
 
   const selectedUser = useMemo<DemoUser>(
     () => demoUsers.find((user) => user.id === selectedUserId) ?? demoUsers[0],
@@ -150,17 +150,17 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (!supabase) {
+    if (!apiClient) {
       return undefined;
     }
 
     async function loadContext() {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-      if (data.session) {
+      const { data } = await getAuthSession(apiClient);
+      setSession(data);
+      if (data) {
         const [contextResult, assetTypesResult] = await Promise.all([
-          getCurrentUserContext(supabase),
-          listAssetTypes(supabase)
+          getCurrentUserContext(apiClient),
+          listAssetTypes(apiClient)
         ]);
         setUserContext(contextResult.data ?? null);
         setAssetTypes(assetTypesResult.data ?? []);
@@ -168,22 +168,22 @@ export default function App() {
     }
 
     loadContext();
-    const unsubscribe = onAuthStateChange(supabase, async (_event, nextSession) => {
+    const unsubscribe = onAuthStateChange(apiClient, async (_event, nextSession) => {
       setSession(nextSession);
       if (nextSession) {
-        const contextResult = await getCurrentUserContext(supabase);
+        const contextResult = await getCurrentUserContext(apiClient);
         setUserContext(contextResult.data ?? null);
       } else {
         setUserContext(null);
       }
     });
     return unsubscribe;
-  }, [supabase]);
+  }, [apiClient]);
 
-  if (isSupabaseReady && !session) {
+  if (isApiReady && !session) {
     return (
       <MobileAuthScreen
-        supabase={supabase}
+        apiClient={apiClient}
         message={message}
         setMessage={setMessage}
       />
@@ -205,14 +205,14 @@ export default function App() {
           {organization.name} - {vehicleTwin.registrationNumber}
         </Text>
         <Text style={styles.securityText}>
-          {isSupabaseReady ? `JWT ${session ? "active" : "pending"}` : "Demo mode"} - {message.text}
+          {isApiReady ? `JWT ${session ? "active" : "pending"}` : "Demo mode"} - {message.text}
         </Text>
         {session && (
           <TouchableOpacity
             style={[styles.actionButton, { marginTop: 10, alignSelf: "flex-start" }]}
             onPress={async () => {
-              if (supabase) {
-                await signOut(supabase);
+              if (apiClient) {
+                await signOut(apiClient);
                 setSession(null);
                 setUserContext(null);
               }
@@ -251,8 +251,8 @@ export default function App() {
       <ScrollView contentContainerStyle={styles.content}>
         {activeSection === "foundation" && (
           <FoundationScreen
-            supabase={supabase}
-            isSupabaseReady={isSupabaseReady}
+            apiClient={apiClient}
+            isApiReady={isApiReady}
             userContext={userContext}
             assetTypes={assetTypes}
             setMessage={setMessage}
@@ -267,21 +267,21 @@ export default function App() {
         )}
         {activeSection === "digital-twin" && <VehicleTwinScreen />}
         {activeSection === "command-center" && <FleetCommandScreen />}
-        {activeSection === "smart-access" && <SmartAccessScreen supabase={supabase} isSupabaseReady={isSupabaseReady} setMessage={setMessage} />}
-        {activeSection === "booking" && <BookingScreen supabase={supabase} isSupabaseReady={isSupabaseReady} setMessage={setMessage} />}
-        {activeSection === "trip-tracking" && <TripTrackingScreen supabase={supabase} isSupabaseReady={isSupabaseReady} setMessage={setMessage} />}
-        {activeSection === "inspection-damage" && <InspectionDamageScreen supabase={supabase} isSupabaseReady={isSupabaseReady} setMessage={setMessage} />}
+        {activeSection === "smart-access" && <SmartAccessScreen apiClient={apiClient} isApiReady={isApiReady} setMessage={setMessage} />}
+        {activeSection === "booking" && <BookingScreen apiClient={apiClient} isApiReady={isApiReady} setMessage={setMessage} />}
+        {activeSection === "trip-tracking" && <TripTrackingScreen apiClient={apiClient} isApiReady={isApiReady} setMessage={setMessage} />}
+        {activeSection === "inspection-damage" && <InspectionDamageScreen apiClient={apiClient} isApiReady={isApiReady} setMessage={setMessage} />}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 function MobileAuthScreen({
-  supabase,
+  apiClient,
   message,
   setMessage
 }: {
-  supabase: any;
+  apiClient: any;
   message: MobileMessage;
   setMessage: (message: MobileMessage) => void;
 }) {
@@ -295,11 +295,11 @@ function MobileAuthScreen({
 
   const submit = async () => {
     const result = mode === "signin"
-      ? await signInWithPassword(supabase, form)
-      : await signUpUser(supabase, form);
+      ? await signInWithPassword(apiClient, form)
+      : await signUpUser(apiClient, form);
     setMessage(result.error
       ? { tone: "error", text: result.error.message }
-      : { tone: "success", text: mode === "signin" ? "Signed in with Supabase JWT." : "Account created." });
+      : { tone: "success", text: mode === "signin" ? "Signed in with FlashAVTL application JWT." : "Account created." });
   };
 
   return (
@@ -340,14 +340,14 @@ function MobileAuthScreen({
 }
 
 function FoundationScreen({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   userContext,
   assetTypes,
   setMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   userContext: any;
   assetTypes: any[];
   setMessage: (message: MobileMessage) => void;
@@ -409,15 +409,15 @@ function FoundationScreen({
       </Panel>
 
       <MobileUserInvitationForm
-        supabase={supabase}
-        isSupabaseReady={isSupabaseReady}
+        apiClient={apiClient}
+        isApiReady={isApiReady}
         userContext={userContext}
         setMessage={setMessage}
       />
 
       <MobileFleetAssetForm
-        supabase={supabase}
-        isSupabaseReady={isSupabaseReady}
+        apiClient={apiClient}
+        isApiReady={isApiReady}
         userContext={userContext}
         assetTypes={assetTypes}
         setMessage={setMessage}
@@ -427,13 +427,13 @@ function FoundationScreen({
 }
 
 function MobileUserInvitationForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   userContext,
   setMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   userContext: any;
   setMessage: (message: MobileMessage) => void;
 }) {
@@ -446,14 +446,19 @@ function MobileUserInvitationForm({
   });
 
   const submit = async () => {
-    if (!isSupabaseReady || !supabase) {
-      setMessage({ tone: "info", text: "Demo mode: configure Supabase to save user invitations." });
+    if (!isApiReady || !apiClient) {
+      setMessage({ tone: "info", text: "API unavailable: user invitation cannot be saved yet." });
       return;
     }
-    const result = await createUserInvitation(supabase, form);
+    const result = await createUserInvitation(apiClient, form);
     setMessage(result.error
       ? { tone: "error", text: result.error.message }
-      : { tone: "success", text: "User invitation saved." });
+      : {
+          tone: "success",
+          text: result.data?.temporaryPassword
+            ? `User created. Temporary password: ${result.data.temporaryPassword}`
+            : "User created."
+        });
   };
 
   return (
@@ -471,14 +476,14 @@ function MobileUserInvitationForm({
 }
 
 function MobileFleetAssetForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   userContext,
   assetTypes,
   setMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   userContext: any;
   assetTypes: any[];
   setMessage: (message: MobileMessage) => void;
@@ -495,11 +500,11 @@ function MobileFleetAssetForm({
   });
 
   const submit = async () => {
-    if (!isSupabaseReady || !supabase) {
-      setMessage({ tone: "info", text: "Demo mode: configure Supabase to save fleet assets." });
+    if (!isApiReady || !apiClient) {
+      setMessage({ tone: "info", text: "API unavailable: fleet asset cannot be saved yet." });
       return;
     }
-    const result = await createFleetAsset(supabase, form);
+    const result = await createFleetAsset(apiClient, form);
     setMessage(result.error
       ? { tone: "error", text: result.error.message }
       : { tone: "success", text: "Fleet asset created." });
@@ -731,12 +736,12 @@ function FleetCommandScreen() {
 }
 
 function SmartAccessScreen({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setMessage: (message: MobileMessage) => void;
 }) {
   return (
@@ -785,18 +790,18 @@ function SmartAccessScreen({
         </View>
       </Panel>
 
-      <MobileAccessGrantForm supabase={supabase} isSupabaseReady={isSupabaseReady} setMessage={setMessage} />
+      <MobileAccessGrantForm apiClient={apiClient} isApiReady={isApiReady} setMessage={setMessage} />
     </>
   );
 }
 
 function BookingScreen({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setMessage: (message: MobileMessage) => void;
 }) {
   return (
@@ -842,18 +847,18 @@ function BookingScreen({
         }))} />
       </Panel>
 
-      <MobileBookingForm supabase={supabase} isSupabaseReady={isSupabaseReady} setMessage={setMessage} />
+      <MobileBookingForm apiClient={apiClient} isApiReady={isApiReady} setMessage={setMessage} />
     </>
   );
 }
 
 function TripTrackingScreen({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setMessage: (message: MobileMessage) => void;
 }) {
   return (
@@ -893,18 +898,18 @@ function TripTrackingScreen({
         <TimelineList events={tripTimeline} />
       </Panel>
 
-      <MobileTripForm supabase={supabase} isSupabaseReady={isSupabaseReady} setMessage={setMessage} />
+      <MobileTripForm apiClient={apiClient} isApiReady={isApiReady} setMessage={setMessage} />
     </>
   );
 }
 
 function InspectionDamageScreen({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setMessage: (message: MobileMessage) => void;
 }) {
   const completion = Math.round((inspectionSession.completedViews / inspectionSession.requiredViews) * 100);
@@ -955,18 +960,18 @@ function InspectionDamageScreen({
         <TimelineList events={damageReviewQueue} />
       </Panel>
 
-      <MobileDamageForm supabase={supabase} isSupabaseReady={isSupabaseReady} setMessage={setMessage} />
+      <MobileDamageForm apiClient={apiClient} isApiReady={isApiReady} setMessage={setMessage} />
     </>
   );
 }
 
 function MobileAccessGrantForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setMessage: (message: MobileMessage) => void;
 }) {
   const [form, setForm] = useState({
@@ -979,11 +984,11 @@ function MobileAccessGrantForm({
   });
 
   const submit = async () => {
-    if (!isSupabaseReady || !supabase) {
-      setMessage({ tone: "info", text: "Demo mode: configure Supabase to save access grants." });
+    if (!isApiReady || !apiClient) {
+      setMessage({ tone: "info", text: "API unavailable: access grant cannot be saved yet." });
       return;
     }
-    const result = await createAccessGrant(supabase, {
+    const result = await createAccessGrant(apiClient, {
       ...form,
       allowedMethods: form.allowedMethods.split(",").map((method) => method.trim()).filter(Boolean)
     });
@@ -1006,12 +1011,12 @@ function MobileAccessGrantForm({
 }
 
 function MobileBookingForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setMessage: (message: MobileMessage) => void;
 }) {
   const [form, setForm] = useState({
@@ -1024,11 +1029,11 @@ function MobileBookingForm({
   });
 
   const submit = async () => {
-    if (!isSupabaseReady || !supabase) {
-      setMessage({ tone: "info", text: "Demo mode: configure Supabase to save bookings." });
+    if (!isApiReady || !apiClient) {
+      setMessage({ tone: "info", text: "API unavailable: booking cannot be saved yet." });
       return;
     }
-    const result = await createBooking(supabase, {
+    const result = await createBooking(apiClient, {
       ...form,
       pricingSnapshot: { estimatedTotal: form.estimatedTotal }
     });
@@ -1051,12 +1056,12 @@ function MobileBookingForm({
 }
 
 function MobileTripForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setMessage: (message: MobileMessage) => void;
 }) {
   const [form, setForm] = useState({
@@ -1068,11 +1073,11 @@ function MobileTripForm({
   });
 
   const submit = async () => {
-    if (!isSupabaseReady || !supabase) {
-      setMessage({ tone: "info", text: "Demo mode: configure Supabase to save trips." });
+    if (!isApiReady || !apiClient) {
+      setMessage({ tone: "info", text: "API unavailable: trip cannot be saved yet." });
       return;
     }
-    const result = await createTrip(supabase, {
+    const result = await createTrip(apiClient, {
       ...form,
       summary: { routeName: form.routeName }
     });
@@ -1094,12 +1099,12 @@ function MobileTripForm({
 }
 
 function MobileDamageForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setMessage: (message: MobileMessage) => void;
 }) {
   const [form, setForm] = useState({
@@ -1111,11 +1116,11 @@ function MobileDamageForm({
   });
 
   const submit = async () => {
-    if (!isSupabaseReady || !supabase) {
-      setMessage({ tone: "info", text: "Demo mode: configure Supabase to save damage reports." });
+    if (!isApiReady || !apiClient) {
+      setMessage({ tone: "info", text: "API unavailable: damage report cannot be saved yet." });
       return;
     }
-    const result = await createDamageReport(supabase, {
+    const result = await createDamageReport(apiClient, {
       ...form,
       aiFindings: { finding: form.finding }
     });

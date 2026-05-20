@@ -17,6 +17,10 @@
     "./repositories": {
       "types": "./src/index.d.ts",
       "default": "./src/repositories.js"
+    },
+    "./api": {
+      "types": "./src/index.d.ts",
+      "default": "./src/api.js"
     }
   },
   "dependencies": {

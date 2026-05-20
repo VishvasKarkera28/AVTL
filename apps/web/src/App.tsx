@@ -75,8 +75,14 @@ import {
   vehicleTwin
 } from "@avtl/domain";
 import type { DemoUser } from "@avtl/domain";
-import { createFlashAvtlClient, hasSupabaseConfig } from "@avtl/domain/supabase";
 import {
+  createFlashAvtlApiClient,
+  getAuthSession,
+  hasApiConfig,
+  onAuthStateChange,
+  signInWithPassword,
+  signOut,
+  signUpUser,
   createAccessGrant,
   createBooking,
   createDamageReport,
@@ -86,12 +92,8 @@ import {
   getCurrentUserContext,
   listAssetTypes,
   listFleetAssets,
-  onAuthStateChange,
-  signInWithPassword,
-  signOut,
-  signUpUser,
   uploadFlashAvtlFile
-} from "@avtl/domain/repositories";
+} from "@avtl/domain/api";
 
 type Section =
   | "foundation"
@@ -150,10 +152,8 @@ type AppMessage = {
   text: string;
 };
 
-const supabaseConfig = {
-  url: import.meta.env.VITE_SUPABASE_URL,
-  anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-  detectSessionInUrl: true
+const apiConfig = {
+  baseUrl: import.meta.env.VITE_API_URL || "http://localhost:8787"
 };
 
 function App() {
@@ -165,13 +165,13 @@ function App() {
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
   const [appMessage, setAppMessage] = useState<AppMessage>({
     tone: "info",
-    text: hasSupabaseConfig(supabaseConfig)
-      ? "Supabase mode is enabled. Sign in to use live tables and storage."
-      : "Demo mode is active. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to connect live Supabase data."
+    text: hasApiConfig(apiConfig)
+      ? "FlashAVTL JWT mode is enabled. Sign in to use live data through the application API."
+      : "Demo mode is active. Add VITE_API_URL to connect the FlashAVTL API."
   });
 
-  const supabase = useMemo(() => createFlashAvtlClient(supabaseConfig), []);
-  const isSupabaseReady = Boolean(supabase);
+  const apiClient = useMemo(() => createFlashAvtlApiClient(apiConfig), []);
+  const isApiReady = Boolean(apiClient);
 
   const selectedUser = useMemo<DemoUser>(
     () => demoUsers.find((user) => user.id === selectedUserId) ?? demoUsers[0],
@@ -189,28 +189,28 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!supabase) {
+    if (!apiClient) {
       return undefined;
     }
 
     let isMounted = true;
 
     async function loadAuthState() {
-      const { data } = await supabase.auth.getSession();
+      const { data } = await getAuthSession(apiClient);
       if (!isMounted) {
         return;
       }
-      setSession(data.session);
-      if (data.session) {
+      setSession(data);
+      if (data) {
         await loadLiveContext();
       }
     }
 
     async function loadLiveContext() {
       const [contextResult, assetTypesResult, fleetAssetsResult] = await Promise.all([
-        getCurrentUserContext(supabase),
-        listAssetTypes(supabase),
-        listFleetAssets(supabase)
+        getCurrentUserContext(apiClient),
+        listAssetTypes(apiClient),
+        listFleetAssets(apiClient)
       ]);
       if (!isMounted) {
         return;
@@ -227,7 +227,7 @@ function App() {
     }
 
     loadAuthState();
-    const unsubscribe = onAuthStateChange(supabase, async (_event, nextSession) => {
+    const unsubscribe = onAuthStateChange(apiClient, async (_event, nextSession) => {
       setSession(nextSession);
       if (nextSession) {
         await loadLiveContext();
@@ -241,7 +241,7 @@ function App() {
       isMounted = false;
       unsubscribe();
     };
-  }, [supabase]);
+  }, [apiClient]);
 
   const navigateToSection = (section: Section) => {
     setActiveSection(section);
@@ -249,23 +249,23 @@ function App() {
   };
 
   const reloadLiveData = async () => {
-    if (!supabase) {
+    if (!apiClient) {
       return;
     }
     const [contextResult, assetTypesResult, fleetAssetsResult] = await Promise.all([
-      getCurrentUserContext(supabase),
-      listAssetTypes(supabase),
-      listFleetAssets(supabase)
+      getCurrentUserContext(apiClient),
+      listAssetTypes(apiClient),
+      listFleetAssets(apiClient)
     ]);
     setUserContext((contextResult as any).data ?? null);
     setAssetTypes((assetTypesResult as any).data ?? []);
     setLiveAssets((fleetAssetsResult as any).data ?? []);
   };
 
-  if (isSupabaseReady && !session) {
+  if (isApiReady && !session) {
     return (
       <AuthScreen
-        supabase={supabase}
+        apiClient={apiClient}
         appMessage={appMessage}
         setAppMessage={setAppMessage}
       />
@@ -344,14 +344,14 @@ function App() {
         </header>
 
         <LiveSecurityBar
-          isSupabaseReady={isSupabaseReady}
+          isApiReady={isApiReady}
           session={session}
           userContext={userContext}
           liveAssets={liveAssets}
           appMessage={appMessage}
           onSignOut={async () => {
-            if (supabase) {
-              await signOut(supabase);
+            if (apiClient) {
+              await signOut(apiClient);
               setSession(null);
               setUserContext(null);
             }
@@ -376,8 +376,8 @@ function App() {
 
         {activeSection === "foundation" && (
           <FoundationView
-            supabase={supabase}
-            isSupabaseReady={isSupabaseReady}
+            apiClient={apiClient}
+            isApiReady={isApiReady}
             userContext={userContext}
             assetTypes={assetTypes}
             setAppMessage={setAppMessage}
@@ -396,29 +396,29 @@ function App() {
         {activeSection === "command-center" && <FleetCommandCenterView />}
         {activeSection === "smart-access" && (
           <SmartAccessView
-            supabase={supabase}
-            isSupabaseReady={isSupabaseReady}
+            apiClient={apiClient}
+            isApiReady={isApiReady}
             setAppMessage={setAppMessage}
           />
         )}
         {activeSection === "booking" && (
           <BookingView
-            supabase={supabase}
-            isSupabaseReady={isSupabaseReady}
+            apiClient={apiClient}
+            isApiReady={isApiReady}
             setAppMessage={setAppMessage}
           />
         )}
         {activeSection === "trip-tracking" && (
           <TripTrackingView
-            supabase={supabase}
-            isSupabaseReady={isSupabaseReady}
+            apiClient={apiClient}
+            isApiReady={isApiReady}
             setAppMessage={setAppMessage}
           />
         )}
         {activeSection === "inspection-damage" && (
           <InspectionDamageView
-            supabase={supabase}
-            isSupabaseReady={isSupabaseReady}
+            apiClient={apiClient}
+            isApiReady={isApiReady}
             setAppMessage={setAppMessage}
           />
         )}
@@ -428,11 +428,11 @@ function App() {
 }
 
 function AuthScreen({
-  supabase,
+  apiClient,
   appMessage,
   setAppMessage
 }: {
-  supabase: any;
+  apiClient: any;
   appMessage: AppMessage;
   setAppMessage: (message: AppMessage) => void;
 }) {
@@ -449,8 +449,8 @@ function AuthScreen({
     event.preventDefault();
     setIsSubmitting(true);
     const result = mode === "signin"
-      ? await signInWithPassword(supabase, form)
-      : await signUpUser(supabase, form);
+      ? await signInWithPassword(apiClient, form)
+      : await signUpUser(apiClient, form);
     setIsSubmitting(false);
 
     if ((result as any).error) {
@@ -460,7 +460,7 @@ function AuthScreen({
 
     setAppMessage({
       tone: "success",
-      text: mode === "signin" ? "Signed in with Supabase JWT session." : "Account created. Confirm email if Supabase requires it."
+      text: mode === "signin" ? "Signed in with FlashAVTL application JWT." : "Account created with FlashAVTL application authentication."
     });
   };
 
@@ -523,14 +523,14 @@ function AuthScreen({
 }
 
 function LiveSecurityBar({
-  isSupabaseReady,
+  isApiReady,
   session,
   userContext,
   liveAssets,
   appMessage,
   onSignOut
 }: {
-  isSupabaseReady: boolean;
+  isApiReady: boolean;
   session: any;
   userContext: any;
   liveAssets: any[];
@@ -540,7 +540,7 @@ function LiveSecurityBar({
   return (
     <section className="live-security-bar">
       <div>
-        <strong>{isSupabaseReady ? "Supabase connected" : "Demo mode"}</strong>
+        <strong>{isApiReady ? "FlashAVTL API connected" : "Demo mode"}</strong>
         <span>{appMessage.text}</span>
       </div>
       <div className="security-kpis">
@@ -559,15 +559,15 @@ function LiveSecurityBar({
 }
 
 function FoundationView({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   userContext,
   assetTypes,
   setAppMessage,
   reloadLiveData
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   userContext: any;
   assetTypes: any[];
   setAppMessage: (message: AppMessage) => void;
@@ -706,15 +706,15 @@ function FoundationView({
       </article>
 
       <UserInvitationForm
-        supabase={supabase}
-        isSupabaseReady={isSupabaseReady}
+        apiClient={apiClient}
+        isApiReady={isApiReady}
         userContext={userContext}
         setAppMessage={setAppMessage}
       />
 
       <FleetAssetForm
-        supabase={supabase}
-        isSupabaseReady={isSupabaseReady}
+        apiClient={apiClient}
+        isApiReady={isApiReady}
         userContext={userContext}
         assetTypes={assetTypes}
         setAppMessage={setAppMessage}
@@ -725,13 +725,13 @@ function FoundationView({
 }
 
 function UserInvitationForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   userContext,
   setAppMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   userContext: any;
   setAppMessage: (message: AppMessage) => void;
 }) {
@@ -741,7 +741,8 @@ function UserInvitationForm({
     email: "",
     phone: "",
     role: "driver",
-    branchId: ""
+    branchId: "",
+    password: ""
   });
 
   useEffect(() => {
@@ -753,16 +754,21 @@ function UserInvitationForm({
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isSupabaseReady || !supabase) {
-      setAppMessage({ tone: "info", text: "Demo mode: user invitation form is ready. Configure Supabase to persist it." });
+    if (!isApiReady || !apiClient) {
+      setAppMessage({ tone: "info", text: "API unavailable: user invitation form is ready but cannot save yet." });
       return;
     }
-    const result = await createUserInvitation(supabase, form);
+    const result = await createUserInvitation(apiClient, form);
     if ((result as any).error) {
       setAppMessage({ tone: "error", text: (result as any).error.message });
       return;
     }
-    setAppMessage({ tone: "success", text: "User invitation saved with RLS authorization." });
+    setAppMessage({
+      tone: "success",
+      text: (result as any).data?.temporaryPassword
+        ? `User created with application RBAC. Temporary password: ${(result as any).data.temporaryPassword}`
+        : "User created with application RBAC."
+    });
   };
 
   return (
@@ -806,6 +812,16 @@ function UserInvitationForm({
           Branch ID
           <input value={form.branchId} onChange={(event) => setForm({ ...form, branchId: event.target.value })} />
         </label>
+        <label>
+          Temporary password
+          <input
+            type="password"
+            minLength={12}
+            value={form.password}
+            onChange={(event) => setForm({ ...form, password: event.target.value })}
+            placeholder="Leave empty to generate"
+          />
+        </label>
         <button className="submit-button" type="submit">
           <Save size={17} aria-hidden="true" />
           Save invitation
@@ -816,15 +832,15 @@ function UserInvitationForm({
 }
 
 function FleetAssetForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   userContext,
   assetTypes,
   setAppMessage,
   reloadLiveData
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   userContext: any;
   assetTypes: any[];
   setAppMessage: (message: AppMessage) => void;
@@ -863,16 +879,16 @@ function FleetAssetForm({
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isSupabaseReady || !supabase) {
-      setAppMessage({ tone: "info", text: "Demo mode: fleet asset form is ready. Configure Supabase to persist it." });
+    if (!isApiReady || !apiClient) {
+      setAppMessage({ tone: "info", text: "API unavailable: fleet asset form is ready but cannot save yet." });
       return;
     }
-    const result = await createFleetAsset(supabase, form);
+    const result = await createFleetAsset(apiClient, form);
     if ((result as any).error) {
       setAppMessage({ tone: "error", text: (result as any).error.message });
       return;
     }
-    setAppMessage({ tone: "success", text: "Fleet asset created in Supabase vehicles table." });
+    setAppMessage({ tone: "success", text: "Fleet asset created through the FlashAVTL API." });
     await reloadLiveData();
   };
 
@@ -1338,12 +1354,12 @@ function FleetCommandCenterView() {
 }
 
 function SmartAccessView({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setAppMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setAppMessage: (message: AppMessage) => void;
 }) {
   return (
@@ -1433,8 +1449,8 @@ function SmartAccessView({
       </article>
 
       <AccessGrantForm
-        supabase={supabase}
-        isSupabaseReady={isSupabaseReady}
+        apiClient={apiClient}
+        isApiReady={isApiReady}
         setAppMessage={setAppMessage}
       />
     </section>
@@ -1442,12 +1458,12 @@ function SmartAccessView({
 }
 
 function BookingView({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setAppMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setAppMessage: (message: AppMessage) => void;
 }) {
   return (
@@ -1536,8 +1552,8 @@ function BookingView({
       </article>
 
       <BookingCreateForm
-        supabase={supabase}
-        isSupabaseReady={isSupabaseReady}
+        apiClient={apiClient}
+        isApiReady={isApiReady}
         setAppMessage={setAppMessage}
       />
     </section>
@@ -1545,12 +1561,12 @@ function BookingView({
 }
 
 function TripTrackingView({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setAppMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setAppMessage: (message: AppMessage) => void;
 }) {
   return (
@@ -1631,8 +1647,8 @@ function TripTrackingView({
       </article>
 
       <TripCreateForm
-        supabase={supabase}
-        isSupabaseReady={isSupabaseReady}
+        apiClient={apiClient}
+        isApiReady={isApiReady}
         setAppMessage={setAppMessage}
       />
     </section>
@@ -1640,12 +1656,12 @@ function TripTrackingView({
 }
 
 function InspectionDamageView({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setAppMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setAppMessage: (message: AppMessage) => void;
 }) {
   const completion = Math.round((inspectionSession.completedViews / inspectionSession.requiredViews) * 100);
@@ -1740,14 +1756,14 @@ function InspectionDamageView({
       </article>
 
       <DamageReportForm
-        supabase={supabase}
-        isSupabaseReady={isSupabaseReady}
+        apiClient={apiClient}
+        isApiReady={isApiReady}
         setAppMessage={setAppMessage}
       />
 
       <StorageUploadForm
-        supabase={supabase}
-        isSupabaseReady={isSupabaseReady}
+        apiClient={apiClient}
+        isApiReady={isApiReady}
         setAppMessage={setAppMessage}
       />
     </section>
@@ -1755,12 +1771,12 @@ function InspectionDamageView({
 }
 
 function AccessGrantForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setAppMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setAppMessage: (message: AppMessage) => void;
 }) {
   const [form, setForm] = useState({
@@ -1776,11 +1792,11 @@ function AccessGrantForm({
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isSupabaseReady || !supabase) {
-      setAppMessage({ tone: "info", text: "Demo mode: access grant form is ready. Configure Supabase to persist it." });
+    if (!isApiReady || !apiClient) {
+      setAppMessage({ tone: "info", text: "API unavailable: access grant form is ready but cannot save yet." });
       return;
     }
-    const result = await createAccessGrant(supabase, {
+    const result = await createAccessGrant(apiClient, {
       ...form,
       allowedMethods: form.allowedMethods.split(",").map((method) => method.trim()).filter(Boolean)
     });
@@ -1807,12 +1823,12 @@ function AccessGrantForm({
 }
 
 function BookingCreateForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setAppMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setAppMessage: (message: AppMessage) => void;
 }) {
   const [form, setForm] = useState({
@@ -1828,17 +1844,17 @@ function BookingCreateForm({
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isSupabaseReady || !supabase) {
-      setAppMessage({ tone: "info", text: "Demo mode: booking form is ready. Configure Supabase to persist it." });
+    if (!isApiReady || !apiClient) {
+      setAppMessage({ tone: "info", text: "API unavailable: booking form is ready but cannot save yet." });
       return;
     }
-    const result = await createBooking(supabase, {
+    const result = await createBooking(apiClient, {
       ...form,
       pricingSnapshot: { estimatedTotal: form.estimatedTotal }
     });
     setAppMessage(result.error
       ? { tone: "error", text: result.error.message }
-      : { tone: "success", text: "Booking created in Supabase." });
+      : { tone: "success", text: "Booking created through the FlashAVTL API." });
   };
 
   return (
@@ -1859,12 +1875,12 @@ function BookingCreateForm({
 }
 
 function TripCreateForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setAppMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setAppMessage: (message: AppMessage) => void;
 }) {
   const [form, setForm] = useState({
@@ -1878,17 +1894,17 @@ function TripCreateForm({
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isSupabaseReady || !supabase) {
-      setAppMessage({ tone: "info", text: "Demo mode: trip form is ready. Configure Supabase to persist it." });
+    if (!isApiReady || !apiClient) {
+      setAppMessage({ tone: "info", text: "API unavailable: trip form is ready but cannot save yet." });
       return;
     }
-    const result = await createTrip(supabase, {
+    const result = await createTrip(apiClient, {
       ...form,
       summary: { routeName: form.routeName }
     });
     setAppMessage(result.error
       ? { tone: "error", text: result.error.message }
-      : { tone: "success", text: "Trip created in Supabase." });
+      : { tone: "success", text: "Trip created through the FlashAVTL API." });
   };
 
   return (
@@ -1908,12 +1924,12 @@ function TripCreateForm({
 }
 
 function DamageReportForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setAppMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setAppMessage: (message: AppMessage) => void;
 }) {
   const [form, setForm] = useState({
@@ -1926,17 +1942,17 @@ function DamageReportForm({
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isSupabaseReady || !supabase) {
-      setAppMessage({ tone: "info", text: "Demo mode: damage report form is ready. Configure Supabase to persist it." });
+    if (!isApiReady || !apiClient) {
+      setAppMessage({ tone: "info", text: "API unavailable: damage report form is ready but cannot save yet." });
       return;
     }
-    const result = await createDamageReport(supabase, {
+    const result = await createDamageReport(apiClient, {
       ...form,
       aiFindings: { finding: form.finding }
     });
     setAppMessage(result.error
       ? { tone: "error", text: result.error.message }
-      : { tone: "success", text: "Damage report created in Supabase." });
+      : { tone: "success", text: "Damage report created through the FlashAVTL API." });
   };
 
   return (
@@ -1955,12 +1971,12 @@ function DamageReportForm({
 }
 
 function StorageUploadForm({
-  supabase,
-  isSupabaseReady,
+  apiClient,
+  isApiReady,
   setAppMessage
 }: {
-  supabase: any;
-  isSupabaseReady: boolean;
+  apiClient: any;
+  isApiReady: boolean;
   setAppMessage: (message: AppMessage) => void;
 }) {
   const [form, setForm] = useState({
@@ -1974,11 +1990,11 @@ function StorageUploadForm({
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isSupabaseReady || !supabase || !file) {
-      setAppMessage({ tone: "info", text: "Demo mode: storage upload form is ready. Configure Supabase and choose a file to upload." });
+    if (!isApiReady || !apiClient || !file) {
+      setAppMessage({ tone: "info", text: "API unavailable: choose a file and reconnect the API before uploading." });
       return;
     }
-    const result = await uploadFlashAvtlFile(supabase, file, {
+    const result = await uploadFlashAvtlFile(apiClient, file, {
       ...form,
       contentType: file.type || "application/octet-stream"
     });

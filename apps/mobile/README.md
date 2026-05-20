@@ -4,7 +4,7 @@ Target stack: React Native with Expo.
 
 Current implementation: Expo SDK 55, React Native, TypeScript, and shared `@avtl/domain` demo data.
 
-When `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` are configured, the app switches from demo mode to live Supabase mode and requires sign in.
+When `EXPO_PUBLIC_API_URL` is configured, the app signs in through the FlashAVTL API with an application JWT. Supabase is used behind the API for tables and storage only.
 
 ## App Modules
 
@@ -50,9 +50,9 @@ When `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` are configur
 - Trip Tracking
 - Inspection and Damage Intelligence
 
-## Live Supabase Forms
+## Live API Forms
 
-- Sign in and sign up with Supabase Auth.
+- Sign in and sign up with FlashAVTL application JWT authentication.
 - Invite users into role-based workflows.
 - Create trucks, buses, ships, cars, bikes, vans, and equipment records.
 - Create smart access grants, rental bookings, active trips, and damage reports.
@@ -68,6 +68,5 @@ The app uses the Expo development server for iOS, Android, and local device test
 Required live-mode variables:
 
 ```bash
-EXPO_PUBLIC_SUPABASE_URL=
-EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_API_URL=http://localhost:8787
 ```
