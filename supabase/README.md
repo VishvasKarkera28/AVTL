@@ -39,20 +39,20 @@ Folder prefixes inside the bucket:
 
 Client applications use:
 
-- `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for the web console.
-- `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` for the mobile app.
+- `VITE_API_URL` for the web console.
+- `EXPO_PUBLIC_API_URL` for the mobile app.
 
 The backend API uses:
 
 - `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `APP_JWT_SECRET`
 
-The service-role key is required for Auth Admin operations such as production user creation and signed upload URL workflows.
+The service-role key is required for API-managed user creation, RBAC writes, and signed upload URL workflows.
 
 ## First Admin Bootstrap
 
-After the migrations are applied, create the first platform admin and the HPCL demo truck with:
+After the migrations are applied, create the first platform admin and the BP demo truck with:
 
 ```bash
 npm run bootstrap:admin

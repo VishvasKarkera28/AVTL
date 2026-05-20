@@ -8,28 +8,28 @@ export const storageConfig = {
     "firmware-artifacts"
   ],
   objectExamples: [
-    "vehicle-documents/7f8a-hpcl-org/ka19hp4472/insurance-2026.pdf",
-    "identity-evidence/7f8a-hpcl-org/usr-nisha-rao/liveness-session-4421.jpg",
-    "inspection-media/7f8a-hpcl-org/booking-demo-001/pre-trip/video.mp4",
-    "damage-media/7f8a-hpcl-org/veh-ka19hp4472/damage-demo-041/front-left.jpg"
+    "vehicle-documents/7f8a-bp-org/mh01bp4472/insurance-2026.pdf",
+    "identity-evidence/7f8a-bp-org/usr-nisha-rao/liveness-session-4421.jpg",
+    "inspection-media/7f8a-bp-org/booking-demo-001/pre-trip/video.mp4",
+    "damage-media/7f8a-bp-org/veh-mh01bp4472/damage-demo-041/front-left.jpg"
   ]
 };
 
 export const organization = {
-  id: "7f8a-hpcl-org",
-  name: "HPCL Petroleum Logistics",
-  legalName: "Hindustan Petroleum Corporation Limited",
-  tenantCode: "HPCL-MANGALURU-FLEET",
+  id: "7f8a-bp-org",
+  name: "BP Petroleum Logistics",
+  legalName: "BP Petroleum Logistics Private Limited",
+  tenantCode: "BP-MUMBAI-FLEET",
   status: "active",
   timezone: "Asia/Kolkata",
   plan: "Enterprise pilot",
   primaryBranch: {
-    id: "branch-mangalore-terminal",
-    name: "Mangaluru Petroleum Terminal",
-    address: "Baikampady Industrial Area, Mangaluru, Karnataka",
+    id: "branch-mumbai-terminal",
+    name: "Mumbai Fuel Terminal",
+    address: "Nhava Sheva Fuel Terminal, Mumbai, Maharashtra",
     coordinates: {
-      latitude: 12.9607,
-      longitude: 74.8366
+      latitude: 19.0760,
+      longitude: 72.8777
     }
   }
 };
@@ -40,7 +40,7 @@ export const moduleStatuses = [
     label: "Platform Foundation",
     status: "ready",
     progress: 86,
-    description: "Tenant, RBAC, storage, audit, branch and environment controls are prepared for the HPCL pilot."
+    description: "Tenant, RBAC, storage, audit, branch and environment controls are prepared for the BP Petroleum pilot."
   },
   {
     id: "identity",
@@ -54,7 +54,7 @@ export const moduleStatuses = [
     label: "Vehicle Digital Twin",
     status: "ready",
     progress: 82,
-    description: "The HPCL petroleum truck lifecycle, device, documents, telemetry and lock history are available."
+    description: "The BP Petroleum truck lifecycle, device, documents, telemetry and lock history are available."
   },
   {
     id: "command-center",
@@ -68,7 +68,7 @@ export const moduleStatuses = [
     label: "Smart Access and Locking",
     status: "ready",
     progress: 72,
-    description: "App, BLE, optical, QR, NFC and offline access flows are connected to HPCL role policies."
+    description: "App, BLE, optical, QR, NFC and offline access flows are connected to BP Petroleum role policies."
   },
   {
     id: "booking",
@@ -121,9 +121,9 @@ export const demoUsers = [
     id: "usr-nisha-rao",
     name: "Nisha Rao",
     role: "Manager",
-    email: "nisha.rao@hpcl.example",
+    email: "nisha.rao@bp.example",
     phone: "+91 98765 44021",
-    branch: "Mangaluru Petroleum Terminal",
+    branch: "Mumbai Fuel Terminal",
     identityStatus: "Verified",
     mfa: true,
     lastSeen: "Today, 09:18",
@@ -133,9 +133,9 @@ export const demoUsers = [
     id: "usr-ramesh-hegde",
     name: "Ramesh Hegde",
     role: "Driver",
-    email: "ramesh.hegde@driver.example",
+    email: "ramesh.hegde@bp.example",
     phone: "+91 98801 77442",
-    branch: "Mangaluru Petroleum Terminal",
+    branch: "Mumbai Fuel Terminal",
     identityStatus: "Verified",
     mfa: false,
     lastSeen: "Today, 08:42",
@@ -145,9 +145,9 @@ export const demoUsers = [
     id: "usr-fatima-sheikh",
     name: "Fatima Sheikh",
     role: "Maintenance",
-    email: "fatima.sheikh@hpcl.example",
+    email: "fatima.sheikh@bp.example",
     phone: "+91 90084 11890",
-    branch: "Mangaluru Service Bay",
+    branch: "Mumbai Service Bay",
     identityStatus: "Verified",
     mfa: true,
     lastSeen: "Yesterday, 17:52",
@@ -162,7 +162,7 @@ export const identityChecks = [
     label: "Driver face match",
     status: "Passed",
     confidence: 98.4,
-    evidencePath: "identity-evidence/7f8a-hpcl-org/usr-ramesh-hegde/idv-4421/selfie.jpg"
+    evidencePath: "identity-evidence/7f8a-bp-org/usr-ramesh-hegde/idv-4421/selfie.jpg"
   },
   {
     id: "idv-4422",
@@ -170,7 +170,7 @@ export const identityChecks = [
     label: "Liveness challenge",
     status: "Passed",
     confidence: 96.9,
-    evidencePath: "identity-evidence/7f8a-hpcl-org/usr-ramesh-hegde/idv-4422/liveness.jpg"
+    evidencePath: "identity-evidence/7f8a-bp-org/usr-ramesh-hegde/idv-4422/liveness.jpg"
   },
   {
     id: "idv-4423",
@@ -178,15 +178,15 @@ export const identityChecks = [
     label: "Manager MFA policy",
     status: "Enabled",
     confidence: 100,
-    evidencePath: "identity-evidence/7f8a-hpcl-org/usr-nisha-rao/mfa-policy.json"
+    evidencePath: "identity-evidence/7f8a-bp-org/usr-nisha-rao/mfa-policy.json"
   }
 ];
 
 export const vehicleTwin = {
-  id: "veh-ka19hp4472",
-  registrationNumber: "KA-19-HP-4472",
-  vin: "MA3HPCLTANK4472",
-  displayName: "HPCL Petroleum Tanker 4472",
+  id: "veh-mh01bp4472",
+  registrationNumber: "MH-01-BP-4472",
+  vin: "BPAVTLTANK4472",
+  displayName: "BP Petroleum Tanker 4472",
   vehicleType: "Petroleum tanker truck",
   make: "Tata Motors",
   model: "LPT 3118 Tanker",
@@ -196,16 +196,16 @@ export const vehicleTwin = {
   productCarried: "High-speed diesel",
   status: "available",
   lockState: "locked",
-  depot: "Mangaluru Petroleum Terminal",
-  route: "Mangaluru Terminal to Udupi Depot",
+  depot: "Mumbai Fuel Terminal",
+  route: "Mumbai Fuel Terminal to Pune Depot",
   driver: "Ramesh Hegde",
   healthScore: 92,
   riskScore: 18,
   odometerKm: 48216,
   utilization: 71,
   currentState: {
-    latitude: 12.9607,
-    longitude: 74.8366,
+    latitude: 19.0760,
+    longitude: 72.8777,
     speedKph: 0,
     ignition: "off",
     network: "LTE",
@@ -214,7 +214,7 @@ export const vehicleTwin = {
     lastSeen: "2026-05-20 09:22 IST"
   },
   device: {
-    serial: "FFAI-BOX-HPCL-0004472",
+    serial: "FFAI-BOX-BP-0004472",
     firmware: "vehicle-box-0.9.4",
     hardware: "rev-pilot-b",
     secureElement: "TA101 class secure element",
@@ -227,31 +227,31 @@ export const vehicleTwin = {
   documents: [
     {
       type: "Registration Certificate",
-      number: "KA19HP4472",
+      number: "MH01BP4472",
       status: "Valid",
       expires: "2038-04-12",
-      storagePath: "vehicle-documents/7f8a-hpcl-org/veh-ka19hp4472/registration.pdf"
+      storagePath: "vehicle-documents/7f8a-bp-org/veh-mh01bp4472/registration.pdf"
     },
     {
       type: "Hazmat Permit",
       number: "HZM-KA-2026-117",
       status: "Valid",
       expires: "2027-01-31",
-      storagePath: "vehicle-documents/7f8a-hpcl-org/veh-ka19hp4472/hazmat-permit.pdf"
+      storagePath: "vehicle-documents/7f8a-bp-org/veh-mh01bp4472/hazmat-permit.pdf"
     },
     {
       type: "Insurance",
-      number: "POL-HPCL-4472-26",
+      number: "POL-BP-4472-26",
       status: "Valid",
       expires: "2027-03-18",
-      storagePath: "vehicle-documents/7f8a-hpcl-org/veh-ka19hp4472/insurance.pdf"
+      storagePath: "vehicle-documents/7f8a-bp-org/veh-mh01bp4472/insurance.pdf"
     },
     {
       type: "Pollution Certificate",
       number: "PUC-4472-0526",
       status: "Review soon",
       expires: "2026-06-18",
-      storagePath: "vehicle-documents/7f8a-hpcl-org/veh-ka19hp4472/puc.pdf"
+      storagePath: "vehicle-documents/7f8a-bp-org/veh-mh01bp4472/puc.pdf"
     }
   ],
   serviceHistory: [
@@ -319,7 +319,7 @@ export const auditEvents = [
     time: "09:22",
     actor: "Vehicle box",
     action: "Latest state synced",
-    scope: "veh-ka19hp4472"
+    scope: "veh-mh01bp4472"
   },
   {
     time: "09:18",
@@ -331,7 +331,7 @@ export const auditEvents = [
     time: "08:04",
     actor: "Ramesh Hegde",
     action: "Unlocked assigned vehicle",
-    scope: "veh-ka19hp4472"
+    scope: "veh-mh01bp4472"
   },
   {
     time: "07:40",
@@ -345,7 +345,7 @@ export const dashboardMetrics = [
   {
     label: "Active tenant",
     value: "1",
-    detail: "HPCL pilot company"
+    detail: "BP Petroleum pilot company"
   },
   {
     label: "Verified users",
@@ -368,7 +368,7 @@ export const fleetCommandMetrics = [
   {
     label: "Available",
     value: "1",
-    detail: "HPCL tanker ready at terminal",
+    detail: "BP tanker ready at terminal",
     tone: "green"
   },
   {
@@ -426,7 +426,7 @@ export const commandCenterAlerts = [
     id: "alert-route-policy",
     severity: "low",
     title: "Route corridor loaded",
-    detail: "Mangaluru Terminal to Udupi Depot geofence corridor is active.",
+    detail: "Mumbai Fuel Terminal to Pune Depot geofence corridor is active.",
     time: "09:20"
   },
   {
@@ -468,14 +468,14 @@ export const commandQueue = [
 export const geofencePolicies = [
   {
     id: "geo-terminal",
-    name: "Mangaluru Petroleum Terminal",
+    name: "Mumbai Fuel Terminal",
     type: "allowed",
     action: "Normal operations",
     status: "active"
   },
   {
     id: "geo-corridor",
-    name: "Udupi delivery corridor",
+    name: "Pune delivery corridor",
     type: "route corridor",
     action: "Alert if route deviation exceeds 1.5 km",
     status: "active"
@@ -533,7 +533,7 @@ export const smartAccessMethods = [
 ];
 
 export const accessGrant = {
-  id: "grant-hpcl-4472-20260520",
+  id: "grant-bp-4472-20260520",
   vehicleId: vehicleTwin.id,
   userId: "usr-ramesh-hegde",
   userName: "Ramesh Hegde",
@@ -543,14 +543,14 @@ export const accessGrant = {
   maxOfflineUses: 2,
   offlineUsesRemaining: 2,
   status: "active",
-  tokenPath: "access-grants/7f8a-hpcl-org/veh-ka19hp4472/grant-hpcl-4472-20260520.json"
+  tokenPath: "access-grants/7f8a-bp-org/veh-mh01bp4472/grant-bp-4472-20260520.json"
 };
 
 export const accessSafetyChecks = [
   {
     label: "Vehicle binding",
     status: "Passed",
-    detail: "Grant is bound to KA-19-HP-4472."
+    detail: "Grant is bound to MH-01-BP-4472."
   },
   {
     label: "User binding",
@@ -570,9 +570,9 @@ export const accessSafetyChecks = [
 ];
 
 export const booking = {
-  id: "booking-hpcl-20260520-001",
+  id: "booking-bp-20260520-001",
   type: "Petroleum delivery assignment",
-  customer: "HPCL Udupi Depot",
+  customer: "BP Pune Depot",
   vehicleId: vehicleTwin.id,
   vehicleName: vehicleTwin.displayName,
   driverId: "usr-ramesh-hegde",
@@ -581,8 +581,8 @@ export const booking = {
   startsAt: "2026-05-20 10:00 IST",
   endsAt: "2026-05-20 16:30 IST",
   status: "ready for dispatch",
-  pickup: "Mangaluru Petroleum Terminal",
-  dropoff: "Udupi Depot",
+  pickup: "Mumbai Fuel Terminal",
+  dropoff: "Pune Depot",
   distanceKm: 59.4,
   cargo: "High-speed diesel",
   quantity: "12 KL",
@@ -630,7 +630,7 @@ export const bookingCalendar = [
   },
   {
     time: "10:00",
-    title: "Dispatch to Udupi Depot",
+    title: "Dispatch to Pune Depot",
     status: "scheduled"
   },
   {
@@ -646,7 +646,7 @@ export const bookingCalendar = [
 ];
 
 export const activeTrip = {
-  id: "trip-hpcl-4472-demo",
+  id: "trip-bp-4472-demo",
   bookingId: booking.id,
   status: "scheduled",
   route: booking.dropoff,
@@ -660,7 +660,7 @@ export const activeTrip = {
   averageSpeedKph: 0,
   idleMinutes: 0,
   riskScore: vehicleTwin.riskScore,
-  geofence: "Udupi delivery corridor active"
+  geofence: "Pune delivery corridor active"
 };
 
 export const tripTimeline = [
@@ -681,7 +681,7 @@ export const tripTimeline = [
   },
   {
     time: "13:15",
-    title: "Expected Udupi arrival",
+    title: "Expected Pune arrival",
     detail: "Depot handoff and post-delivery confirmation."
   }
 ];
@@ -718,13 +718,13 @@ export const tripEvents = [
 ];
 
 export const inspectionSession = {
-  id: "inspection-hpcl-4472-20260520",
+  id: "inspection-bp-4472-20260520",
   vehicleId: vehicleTwin.id,
   bookingId: booking.id,
   status: "pre-trip pending",
   requiredViews: 8,
   completedViews: 6,
-  storageBasePath: "inspection-media/7f8a-hpcl-org/booking-hpcl-20260520-001/pre-trip/",
+  storageBasePath: "inspection-media/7f8a-bp-org/booking-bp-20260520-001/pre-trip/",
   reviewer: "Nisha Rao"
 };
 
@@ -732,22 +732,22 @@ export const inspectionChecklist = [
   {
     label: "Front view",
     status: "captured",
-    path: "inspection-media/7f8a-hpcl-org/booking-hpcl-20260520-001/pre-trip/front.jpg"
+    path: "inspection-media/7f8a-bp-org/booking-bp-20260520-001/pre-trip/front.jpg"
   },
   {
     label: "Left tank shell",
     status: "captured",
-    path: "inspection-media/7f8a-hpcl-org/booking-hpcl-20260520-001/pre-trip/left-shell.jpg"
+    path: "inspection-media/7f8a-bp-org/booking-bp-20260520-001/pre-trip/left-shell.jpg"
   },
   {
     label: "Rear valve area",
     status: "captured",
-    path: "inspection-media/7f8a-hpcl-org/booking-hpcl-20260520-001/pre-trip/rear-valve.jpg"
+    path: "inspection-media/7f8a-bp-org/booking-bp-20260520-001/pre-trip/rear-valve.jpg"
   },
   {
     label: "Seal and hazmat placard",
     status: "pending",
-    path: "inspection-media/7f8a-hpcl-org/booking-hpcl-20260520-001/pre-trip/seal-placard.jpg"
+    path: "inspection-media/7f8a-bp-org/booking-bp-20260520-001/pre-trip/seal-placard.jpg"
   }
 ];
 
@@ -759,8 +759,8 @@ export const damageFindings = [
     type: "Surface scratch",
     confidence: 88.6,
     status: "needs staff review",
-    beforePath: "damage-media/7f8a-hpcl-org/veh-ka19hp4472/baseline/front-left.jpg",
-    afterPath: "damage-media/7f8a-hpcl-org/veh-ka19hp4472/damage-demo-041/front-left.jpg"
+    beforePath: "damage-media/7f8a-bp-org/veh-mh01bp4472/baseline/front-left.jpg",
+    afterPath: "damage-media/7f8a-bp-org/veh-mh01bp4472/damage-demo-041/front-left.jpg"
   },
   {
     id: "damage-demo-042",
@@ -769,8 +769,8 @@ export const damageFindings = [
     type: "No new damage",
     confidence: 96.1,
     status: "auto cleared",
-    beforePath: "damage-media/7f8a-hpcl-org/veh-ka19hp4472/baseline/tank-shell.jpg",
-    afterPath: "damage-media/7f8a-hpcl-org/veh-ka19hp4472/damage-demo-042/tank-shell.jpg"
+    beforePath: "damage-media/7f8a-bp-org/veh-mh01bp4472/baseline/tank-shell.jpg",
+    afterPath: "damage-media/7f8a-bp-org/veh-mh01bp4472/damage-demo-042/tank-shell.jpg"
   }
 ];
 

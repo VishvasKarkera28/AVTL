@@ -200,7 +200,7 @@ export default function App() {
           resizeMode="contain"
           accessibilityLabel="FlashAVTL - Track. Lock. Protect. Everywhere."
         />
-        <Text style={styles.eyebrow}>HPCL pilot workspace</Text>
+        <Text style={styles.eyebrow}>BP Petroleum pilot workspace</Text>
         <Text style={styles.subtitle}>
           {organization.name} - {vehicleTwin.registrationNumber}
         </Text>
@@ -553,7 +553,7 @@ function IdentityScreen({
         </View>
       </Panel>
 
-      <Panel eyebrow="Directory" title="HPCL users" icon={UserCheck}>
+      <Panel eyebrow="Directory" title="BP Petroleum users" icon={UserCheck}>
         <View style={styles.rowList}>
           {demoUsers.map((user) => (
             <TouchableOpacity
@@ -1261,7 +1261,7 @@ function TruckVisual() {
   return (
     <View style={styles.truckScene}>
       <View style={styles.truckBody}>
-        <Text style={styles.truckLabel}>HPCL</Text>
+        <Text style={styles.truckLabel}>BP</Text>
         <View style={styles.truckStripe} />
       </View>
       <View style={styles.wheelRow}>

@@ -325,14 +325,14 @@ function App() {
               alt="FlashAVTL"
             />
             <div>
-              <p className="eyebrow">HPCL pilot workspace</p>
+              <p className="eyebrow">BP Petroleum pilot workspace</p>
               <h2>{navigation.find((item) => item.id === activeSection)?.label}</h2>
             </div>
           </div>
           <div className="topbar-actions">
             <label className="search-box">
               <Search size={17} aria-hidden="true" />
-              <input value="KA-19-HP-4472" readOnly aria-label="Search" />
+              <input value="MH-01-BP-4472" readOnly aria-label="Search" />
             </label>
             <button className="icon-button" aria-label="Notifications">
               <Bell size={19} aria-hidden="true" />
@@ -998,7 +998,7 @@ function IdentityView({
         <div className="panel-header">
           <div>
             <p className="eyebrow">Directory</p>
-            <h3>HPCL users</h3>
+            <h3>BP Petroleum users</h3>
           </div>
           <UserCheck size={22} className="good-icon" aria-hidden="true" />
         </div>
@@ -1109,7 +1109,7 @@ function VehicleTwinView() {
             </button>
           </div>
         </div>
-        <img src="/hpcl-tanker.svg" alt="HPCL petroleum tanker truck" />
+        <img src="/bp-tanker.svg" alt="BP Petroleum tanker truck" />
       </article>
 
       <article className="panel telemetry-panel">
@@ -1136,7 +1136,7 @@ function VehicleTwinView() {
           </div>
           <MapPin size={22} className="neutral-icon" aria-hidden="true" />
         </div>
-        <img src="/terminal-map.svg" alt="Mangaluru terminal to Udupi depot route map" />
+        <img src="/bp-terminal-map.svg" alt="Mumbai fuel terminal to Pune depot route map" />
       </article>
 
       <article className="panel device-panel">
@@ -1266,7 +1266,7 @@ function FleetCommandCenterView() {
           <MapPinned size={22} className="neutral-icon" aria-hidden="true" />
         </div>
         <div className="command-map">
-          <img src="/terminal-map.svg" alt="HPCL petroleum route command map" />
+          <img src="/bp-terminal-map.svg" alt="BP Petroleum route command map" />
           <div className="map-vehicle-marker">
             <Truck size={18} aria-hidden="true" />
             <strong>{primaryVehicle.registrationNumber}</strong>
@@ -1627,7 +1627,7 @@ function TripTrackingView({
           </div>
           <Route size={22} className="neutral-icon" aria-hidden="true" />
         </div>
-        <img src="/terminal-map.svg" alt="Active trip corridor map" />
+        <img src="/bp-terminal-map.svg" alt="Active trip corridor map" />
       </article>
 
       <article className="panel trip-timeline-panel">

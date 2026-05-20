@@ -11,12 +11,13 @@ const configSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
   FLASHAVTL_BOOTSTRAP_EMAIL: z.string().email(),
   FLASHAVTL_BOOTSTRAP_PASSWORD: z.string().min(12),
-  FLASHAVTL_BOOTSTRAP_NAME: z.string().min(2).default("HPCL Fleet Platform Admin"),
+  FLASHAVTL_BOOTSTRAP_NAME: z.string().min(2).default("BP Petroleum Platform Admin"),
   FLASHAVTL_BOOTSTRAP_PHONE: z.string().optional().default(""),
-  FLASHAVTL_BOOTSTRAP_ORG: z.string().min(2).default("HPCL Petroleum Logistics"),
-  FLASHAVTL_BOOTSTRAP_BRANCH: z.string().min(2).default("Mangaluru Petroleum Depot"),
-  FLASHAVTL_BOOTSTRAP_VEHICLE_REG: z.string().min(2).default("KA-19-HPCL-2048"),
-  FLASHAVTL_BOOTSTRAP_SKIP_DEMO_VEHICLE: z.string().optional().default("false")
+  FLASHAVTL_BOOTSTRAP_ORG: z.string().min(2).default("BP Petroleum Logistics"),
+  FLASHAVTL_BOOTSTRAP_BRANCH: z.string().min(2).default("Mumbai Fuel Terminal"),
+  FLASHAVTL_BOOTSTRAP_VEHICLE_REG: z.string().min(2).default("MH-01-BP-4472"),
+  FLASHAVTL_BOOTSTRAP_SKIP_DEMO_VEHICLE: z.string().optional().default("false"),
+  FLASHAVTL_BOOTSTRAP_RESET_DEMO: z.string().optional().default("false")
 });
 
 const env = configSchema.parse(process.env);
@@ -27,6 +28,10 @@ const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
     autoRefreshToken: false
   }
 });
+
+if (env.FLASHAVTL_BOOTSTRAP_RESET_DEMO === "true") {
+  await resetDemoData();
+}
 
 const { organizationId, branchId } = await ensureWorkspace();
 const adminUserId = await ensureAdminUser(organizationId, branchId);
@@ -55,7 +60,7 @@ async function ensureWorkspace() {
       .from("organizations")
       .insert({
         name: env.FLASHAVTL_BOOTSTRAP_ORG,
-        legal_name: "Hindustan Petroleum Corporation Limited",
+        legal_name: "BP Petroleum Logistics Private Limited",
         country_code: "IN",
         timezone: "Asia/Kolkata",
         status: "active"
@@ -86,9 +91,9 @@ async function ensureWorkspace() {
       .insert({
         organization_id: organization.id,
         name: env.FLASHAVTL_BOOTSTRAP_BRANCH,
-        address: "HPCL coastal logistics yard, Mangaluru, Karnataka",
-        latitude: 12.9141,
-        longitude: 74.856
+        address: "BP Petroleum coastal fuel terminal, Mumbai, Maharashtra",
+        latitude: 19.076,
+        longitude: 72.8777
       })
       .select("id")
       .single();
@@ -175,10 +180,10 @@ async function ensureDemoTruck({ organizationId, branchId }) {
         organization_id: organizationId,
         branch_id: branchId,
         registration_number: env.FLASHAVTL_BOOTSTRAP_VEHICLE_REG,
-        vin: "HPCLAVTLDEMO0001",
+        vin: "BPAVTLDEMO0001",
         vehicle_type: "truck",
-        make: "Ashok Leyland",
-        model: "Petroleum Tanker 16KL",
+        make: "Tata Motors",
+        model: "BP Petroleum Tanker 16KL",
         year: 2024,
         status: "available",
         lock_state: "locked",
@@ -186,8 +191,8 @@ async function ensureDemoTruck({ organizationId, branchId }) {
         fuel_percent: 74,
         battery_percent: 91,
         last_seen_at: new Date().toISOString(),
-        current_latitude: 12.9141,
-        current_longitude: 74.856
+        current_latitude: 19.076,
+        current_longitude: 72.8777
       })
       .select("id")
       .single();
@@ -202,8 +207,8 @@ async function ensureDemoTruck({ organizationId, branchId }) {
   const { error: stateError } = await supabase.from("vehicle_latest_state").upsert({
     vehicle_id: vehicle.id,
     recorded_at: new Date().toISOString(),
-    latitude: 12.9141,
-    longitude: 74.856,
+    latitude: 19.076,
+    longitude: 72.8777,
     speed_kph: 0,
     heading_deg: 88,
     ignition_on: false,
@@ -218,6 +223,46 @@ async function ensureDemoTruck({ organizationId, branchId }) {
     }
   });
   throwIf(stateError, "Could not create latest vehicle state");
+}
+
+async function resetDemoData() {
+  const demoOrgNames = [
+    "HPCL Petroleum Logistics",
+    "BP Petroleum Logistics",
+    env.FLASHAVTL_BOOTSTRAP_ORG
+  ];
+  const demoEmails = [
+    env.FLASHAVTL_BOOTSTRAP_EMAIL,
+    "admin@flashavtl.local",
+    "bp.admin@flashavtl.local"
+  ];
+
+  const { data: organizations, error: orgReadError } = await supabase
+    .from("organizations")
+    .select("id, name")
+    .in("name", Array.from(new Set(demoOrgNames)));
+  throwIf(orgReadError, "Could not read demo organizations");
+
+  const organizationIds = organizations?.map((organization) => organization.id) ?? [];
+  if (organizationIds.length) {
+    const { error: deleteOrgError } = await supabase
+      .from("organizations")
+      .delete()
+      .in("id", organizationIds);
+    throwIf(deleteOrgError, "Could not delete old demo organizations");
+  }
+
+  const { error: staleUserError } = await supabase
+    .from("app_users")
+    .delete()
+    .in("email", Array.from(new Set(demoEmails)));
+  throwIf(staleUserError, "Could not delete stale demo app users");
+
+  const { error: staleInvitationError } = await supabase
+    .from("user_invitations")
+    .delete()
+    .in("email", Array.from(new Set(demoEmails)));
+  throwIf(staleInvitationError, "Could not delete stale demo invitations");
 }
 
 function throwIf(error, prefix) {
