@@ -1,0 +1,32 @@
+{
+  "name": "avtl-flashfleet-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Advanced Vehicle Fleet Intelligence and Secure Access Platform",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w @avtl/web",
+    "build:web": "npm run build -w @avtl/web",
+    "preview:web": "npm run preview -w @avtl/web",
+    "dev:mobile": "npm run start -w @avtl/mobile",
+    "dev:api": "npm run dev -w @avtl/api",
+    "start:api": "npm run start -w @avtl/api",
+    "bootstrap:admin": "node scripts/bootstrap-platform-admin.mjs",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "validate": "npm run typecheck --workspaces --if-present && npm run build:web",
+    "docs:list": "find docs -maxdepth 3 -type f | sort",
+    "schema:show": "sed -n '1,220p' docs/backend/database-schema.sql"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.105.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "zod": "^4.4.3"
+  }
+}

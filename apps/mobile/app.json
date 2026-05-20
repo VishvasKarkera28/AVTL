@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "FlashFleet AI",
+    "slug": "flashfleet-ai",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "flashavtl",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.avtl.flashfleet"
+    },
+    "android": {
+      "package": "com.avtl.flashfleet",
+      "adaptiveIcon": {
+        "backgroundColor": "#17212B"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

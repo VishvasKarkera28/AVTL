@@ -1,0 +1,25 @@
+{
+  "name": "@avtl/domain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./supabase": {
+      "types": "./src/index.d.ts",
+      "default": "./src/supabase.js"
+    },
+    "./repositories": {
+      "types": "./src/index.d.ts",
+      "default": "./src/repositories.js"
+    }
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.105.0"
+  }
+}

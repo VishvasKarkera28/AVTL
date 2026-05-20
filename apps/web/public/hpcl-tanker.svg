@@ -1,0 +1,23 @@
+<svg width="960" height="520" viewBox="0 0 960 520" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="HPCL petroleum tanker truck">
+  <rect width="960" height="520" rx="0" fill="#F7FAFC"/>
+  <path d="M74 380H884" stroke="#D8E2EA" stroke-width="10" stroke-linecap="round"/>
+  <path d="M155 338H770C820 338 852 365 852 398H115C119 362 131 338 155 338Z" fill="#25313C"/>
+  <path d="M190 207C190 165 224 131 266 131H620C662 131 696 165 696 207V318H190V207Z" fill="#FFFFFF" stroke="#22313F" stroke-width="8"/>
+  <path d="M222 209C222 185 241 166 265 166H611C635 166 654 185 654 209V283H222V209Z" fill="#E7F0F4"/>
+  <path d="M222 283H654V318H222V283Z" fill="#FFB000"/>
+  <path d="M698 230H787C811 230 831 250 831 274V338H698V230Z" fill="#FFFFFF" stroke="#22313F" stroke-width="8"/>
+  <path d="M724 255H782C794 255 804 265 804 277V300H724V255Z" fill="#CDE7F0"/>
+  <path d="M106 319H855V344H106V319Z" fill="#FFB000"/>
+  <circle cx="235" cy="394" r="51" fill="#17212B"/>
+  <circle cx="235" cy="394" r="25" fill="#C8D5DD"/>
+  <circle cx="682" cy="394" r="51" fill="#17212B"/>
+  <circle cx="682" cy="394" r="25" fill="#C8D5DD"/>
+  <path d="M353 202H555" stroke="#D3212D" stroke-width="20" stroke-linecap="round"/>
+  <path d="M356 244H550" stroke="#25313C" stroke-width="12" stroke-linecap="round"/>
+  <text x="332" y="236" fill="#25313C" font-family="Arial, sans-serif" font-size="52" font-weight="700">HPCL</text>
+  <rect x="132" y="352" width="68" height="18" rx="4" fill="#E54335"/>
+  <rect x="775" y="350" width="42" height="18" rx="4" fill="#E54335"/>
+  <circle cx="820" cy="320" r="9" fill="#F7FAFC"/>
+  <path d="M128 301H178" stroke="#22313F" stroke-width="9" stroke-linecap="round"/>
+  <path d="M214 121C264 82 337 61 446 61C554 61 625 84 674 121" stroke="#D8E2EA" stroke-width="10" stroke-linecap="round"/>
+</svg>

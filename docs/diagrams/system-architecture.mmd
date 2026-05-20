@@ -1,0 +1,11 @@
+flowchart TB
+    Mobile["Mobile Apps"] --> API["Fleet API"]
+    Web["Web Console"] --> API
+    Vehicle["FlashFleet Vehicle Box"] --> API
+    API --> DB["Supabase Postgres/Auth/Storage"]
+    API --> Stream["Kafka/Event Stream"]
+    Stream --> AI["AI Services"]
+    AI --> DB
+    API --> Audit["Audit Logs"]
+    API --> OTA["OTA Service"]
+    OTA --> Vehicle

@@ -1,0 +1,15 @@
+<svg width="840" height="460" viewBox="0 0 840 460" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mangaluru petroleum terminal route map">
+  <rect width="840" height="460" fill="#F4F7F8"/>
+  <path d="M72 343C160 310 224 334 292 292C359 251 365 169 455 156C543 143 610 194 752 116" stroke="#B8C9D2" stroke-width="24" stroke-linecap="round"/>
+  <path d="M72 343C160 310 224 334 292 292C359 251 365 169 455 156C543 143 610 194 752 116" stroke="#F0A808" stroke-width="8" stroke-linecap="round"/>
+  <path d="M96 90H210V188H96V90Z" fill="#FFFFFF" stroke="#CBD7DE" stroke-width="4"/>
+  <path d="M604 254H758V354H604V254Z" fill="#FFFFFF" stroke="#CBD7DE" stroke-width="4"/>
+  <path d="M437 102L473 102L491 134L473 166L437 166L419 134L437 102Z" fill="#D3212D"/>
+  <circle cx="455" cy="134" r="12" fill="#FFFFFF"/>
+  <circle cx="72" cy="343" r="16" fill="#0B7A5F"/>
+  <circle cx="752" cy="116" r="16" fill="#25313C"/>
+  <text x="92" y="380" fill="#25313C" font-family="Arial, sans-serif" font-size="22" font-weight="700">Mangaluru Terminal</text>
+  <text x="610" y="101" fill="#25313C" font-family="Arial, sans-serif" font-size="22" font-weight="700">Udupi Depot</text>
+  <text x="115" y="145" fill="#637282" font-family="Arial, sans-serif" font-size="18">Fuel Bay</text>
+  <text x="631" y="312" fill="#637282" font-family="Arial, sans-serif" font-size="18">Service Bay</text>
+</svg>

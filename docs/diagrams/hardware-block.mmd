@@ -1,0 +1,14 @@
+flowchart TB
+    Battery["Vehicle Battery"] --> Protection["Fuse + TVS + Reverse Protection"]
+    Protection --> Power["5 V / 3.3 V Rails"]
+    Power --> MCU["ESP32-S3"]
+    MCU <--> Secure["Secure Element"]
+    MCU <--> LTE["LTE/NB-IoT Modem"]
+    MCU <--> GNSS["GNSS"]
+    MCU <--> CAN["CAN Transceiver + OBD-II"]
+    MCU <--> IMU["IMU"]
+    Optical["Photodiode + TIA"] --> MCU
+    NFC["NFC Reader"] <--> MCU
+    MCU --> Driver["Protected Driver"]
+    Driver --> Lock["Approved Lock Actuator"]
+    Tamper["Tamper Inputs"] --> MCU
